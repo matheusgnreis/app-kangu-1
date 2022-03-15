@@ -20,9 +20,48 @@ exports.post = ({ appSdk }, req, res) => {
   // merge all app options configured by merchant
   const appData = Object.assign({}, application.data, application.hidden_data)
 
+  const token = appData.kangu_token
+  if (!token) {
+    // must have configured Datafrete doc number and token
+    return res.status(409).send({
+      error: 'CALCULATE_AUTH_ERR',
+      message: 'Token or document unset on app hidden data (merchant must configure the app)'
+    })
+  }
+
   if (appData.free_shipping_from_value >= 0) {
     response.free_shipping_from_value = appData.free_shipping_from_value
   }
+
+  const destinationZip = params.to ? params.to.zip.replace(/\D/g, '') : ''
+  const originZip = params.from
+    ? params.from.zip.replace(/\D/g, '')
+    : appData.zip ? appData.zip.replace(/\D/g, '') : ''
+
+  const checkZipCode = rule => {
+    // validate rule zip range
+    if (destinationZip && rule.zip_range) {
+      const { min, max } = rule.zip_range
+      return Boolean((!min || destinationZip >= min) && (!max || destinationZip <= max))
+    }
+    return true
+  }
+
+  // search for configured free shipping rule
+  if (Array.isArray(appData.free_shipping_rules)) {
+    for (let i = 0; i < appData.free_shipping_rules.length; i++) {
+      const rule = appData.free_shipping_rules[i]
+      if (rule && checkZipCode(rule)) {
+        if (!rule.min_amount) {
+          response.free_shipping_from_value = 0
+          break
+        } else if (!(response.free_shipping_from_value <= rule.min_amount)) {
+          response.free_shipping_from_value = rule.min_amount
+        }
+      }
+    }
+  }
+
   if (!params.to) {
     // just a free shipping preview with no shipping address received
     // respond only with free shipping option
@@ -31,6 +70,14 @@ exports.post = ({ appSdk }, req, res) => {
   }
 
   /* DO THE STUFF HERE TO FILL RESPONSE OBJECT WITH SHIPPING SERVICES */
+
+  if (!originZip) {
+    // must have configured origin zip code to continue
+    return res.status(409).send({
+      error: 'CALCULATE_ERR',
+      message: 'Zip code is unset on app hidden data (merchant must configure the app)'
+    })
+  }
 
   /**
    * Sample snippets:
