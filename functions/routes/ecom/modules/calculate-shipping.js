@@ -79,14 +79,166 @@ exports.post = ({ appSdk }, req, res) => {
     })
   }
 
-  /**
-   * Sample snippets:
+
 
   if (params.items) {
-    let totalWeight = 0
-    params.items.forEach(item => {
-      // treat items to ship
-      totalWeight += item.quantity * item.weight.value
+    const headers = {
+      token,
+      accept: 'application/json',
+      'Content-Type': 'application/json'
+  }
+    // send POST request to Datafrete REST API
+    return axios.post(
+      'https://portal.kangu.com.br/tms/transporte/simular',    
+      {
+        cepOrigem: originZip,
+        cepDestino: destinationZip,
+        origem: 'E-Com Plus',
+        produtos: params.items.map(item => {
+          const { name, quantity, dimensions, weight } = item
+          // parse cart items to Datafrete schema
+          let kgWeight = 0
+          if (weight && weight.value) {
+            switch (weight.unit) {
+              case 'g':
+                kgWeight = weight.value / 1000
+                break
+              case 'mg':
+                kgWeight = weight.value / 1000000
+                break
+              default:
+                kgWeight = weight.value
+            }
+          }
+          const cmDimensions = {}
+          if (dimensions) {
+            for (const side in dimensions) {
+              const dimension = dimensions[side]
+              if (dimension && dimension.value) {
+                switch (dimension.unit) {
+                  case 'm':
+                    cmDimensions[side] = dimension.value * 100
+                    break
+                  case 'mm':
+                    cmDimensions[side] = dimension.value / 10
+                    break
+                  default:
+                    cmDimensions[side] = dimension.value
+                }
+              }
+            }
+          }
+          return {
+            peso: kgWeight,
+            altura: cmDimensions.height || 0,
+            largura: cmDimensions.width || 0,
+            comprimento: cmDimensions.length || 0,
+            valor: ecomUtils.price(item),
+            quantidade: quantity,
+            produto: name,
+          }
+        })
+      },
+      { headers }
+    )
+
+      .then(({ data, status }) => {
+        let result
+        if (typeof data === 'string') {
+          try {
+            result = JSON.parse(data)
+          } catch (e) {
+            console.log('> Datafrete invalid JSON response')
+            return res.status(409).send({
+              error: 'CALCULATE_INVALID_RES',
+              message: data
+            })
+          }
+        } else {
+          result = data
+        }
+
+        if (result && Number(status) === 200 && Array.isArray(result)) {
+          // success response
+          result.forEach(kanguService => {
+            // parse to E-Com Plus shipping line object
+            const serviceCode = String(kanguService.referencia)
+            const price = kanguService.vlrFrete
+    
+            // push shipping service object to response
+            response.shipping_services.push({
+              label: kanguService.transp_nome|| kanguService.descricao,
+              carrier: kanguService.nome_transportador,
+              carrier_doc_number: typeof kanguService.cnpjTransp === 'string'
+                ? kanguService.cnpjTransp.replace(/\D/g, '').substr(0, 19)
+                : undefined,
+              service_name: `${(kanguService.descricao || serviceCode)} (Kangu)`,
+              service_code: serviceCode,
+              shipping_line: {
+                from: {
+                  ...params.from,
+                  zip: originZip
+                },
+                to: params.to,
+                price,
+                total_price: price,
+                discount: 0,
+                delivery_time: {
+                  days: parseInt(kanguService.prazoEnt, 10),
+                  working_days: true
+                },
+                posting_deadline: {
+                  days: 3,
+                  ...appData.posting_deadline
+                },
+                flags: ['kangu-ws', `kangu-${serviceCode}`.substr(0, 20)]
+              }
+            })
+          })
+          console.log(response)
+        } else {
+          // console.log(data)
+          const err = new Error('Invalid Kangu calculate response')
+          err.response = { data, status }
+          throw err
+        }
+      })
+
+      .catch(err => {
+        let { message, response } = err
+        if (response && response.data) {
+          // try to handle Datafrete error response
+          const { data } = response
+          let result
+          if (typeof data === 'string') {
+            try {
+              result = JSON.parse(data)
+            } catch (e) {
+            }
+          } else {
+            result = data
+          }
+          console.log('> Datafrete invalid result:', data)
+          if (result && result.data) {
+            // Datafrete error message
+            return res.status(409).send({
+              error: 'CALCULATE_FAILED',
+              message: result.data
+            })
+          }
+          message = `${message} (${response.status})`
+        } else {
+          console.error(err)
+        }
+        return res.status(409).send({
+          error: 'CALCULATE_ERR',
+          message
+        })
+      })
+  } else {
+    res.status(400).send({
+      error: 'CALCULATE_EMPTY_CART',
+      message: 'Cannot calculate shipping without cart items'
     })
   }
 
@@ -109,8 +261,6 @@ exports.post = ({ appSdk }, req, res) => {
       }
     }
   })
-
-  */
 
   res.send(response)
 }
