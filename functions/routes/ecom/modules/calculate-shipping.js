@@ -206,7 +206,7 @@ exports.post = ({ appSdk }, req, res) => {
               }
             })
           })
-          console.log(response)
+          res.send(response)
         } else {
           // console.log(data)
           const err = new Error('Invalid Kangu calculate response')
