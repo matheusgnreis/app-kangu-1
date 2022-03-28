@@ -10,7 +10,7 @@ exports.post = ({ appSdk }, req, res) => {
    *
    * Examples in published apps:
    * https://github.com/ecomplus/app-mandabem/blob/master/functions/routes/ecom/modules/calculate-shipping.js
-   * https://github.com/ecomplus/app-datafrete/blob/master/functions/routes/ecom/modules/calculate-shipping.js
+   * https://github.com/ecomplus/app-kangu/blob/master/functions/routes/ecom/modules/calculate-shipping.js
    * https://github.com/ecomplus/app-jadlog/blob/master/functions/routes/ecom/modules/calculate-shipping.js
    */
 
@@ -25,7 +25,7 @@ exports.post = ({ appSdk }, req, res) => {
 
   const token = appData.kangu_token
   if (!token) {
-    // must have configured Datafrete doc number and token
+    // must have configured kangu doc number and token
     return res.status(409).send({
       error: 'CALCULATE_AUTH_ERR',
       message: 'Token or document unset on app hidden data (merchant must configure the app)'
@@ -92,7 +92,7 @@ exports.post = ({ appSdk }, req, res) => {
       accept: 'application/json',
       'Content-Type': 'application/json'
   }
-    // send POST request to Datafrete REST API
+    // send POST request to kangu REST API
     return axios.post(
       'https://portal.kangu.com.br/tms/transporte/simular',    
       {
@@ -101,7 +101,7 @@ exports.post = ({ appSdk }, req, res) => {
         origem: 'E-Com Plus',
         produtos: params.items.map(item => {
           const { name, quantity, dimensions, weight } = item
-          // parse cart items to Datafrete schema
+          // parse cart items to kangu schema
           let kgWeight = 0
           if (weight && weight.value) {
             switch (weight.unit) {
@@ -141,6 +141,11 @@ exports.post = ({ appSdk }, req, res) => {
             valor: ecomUtils.price(item),
             quantidade: quantity,
             produto: name,
+            servicos: [ 
+              "E",
+              "X",
+              "R"
+            ],
             ordernar
           }
         })
@@ -154,7 +159,7 @@ exports.post = ({ appSdk }, req, res) => {
           try {
             result = JSON.parse(data)
           } catch (e) {
-            console.log('> Datafrete invalid JSON response')
+            console.log('> kangu invalid JSON response')
             return res.status(409).send({
               error: 'CALCULATE_INVALID_RES',
               message: data
@@ -213,7 +218,7 @@ exports.post = ({ appSdk }, req, res) => {
       .catch(err => {
         let { message, response } = err
         if (response && response.data) {
-          // try to handle Datafrete error response
+          // try to handle kangu error response
           const { data } = response
           let result
           if (typeof data === 'string') {
@@ -224,9 +229,9 @@ exports.post = ({ appSdk }, req, res) => {
           } else {
             result = data
           }
-          console.log('> Datafrete invalid result:', data)
+          console.log('> kangu invalid result:', data)
           if (result && result.data) {
-            // Datafrete error message
+            // kangu error message
             return res.status(409).send({
               error: 'CALCULATE_FAILED',
               message: result.data
