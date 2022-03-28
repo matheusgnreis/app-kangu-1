@@ -179,7 +179,7 @@ exports.post = ({ appSdk }, req, res) => {
             // push shipping service object to response
             response.shipping_services.push({
               label: kanguService.transp_nome|| kanguService.descricao,
-              carrier: kanguService.nome_transportador,
+              carrier: kanguService.transp_nome,
               carrier_doc_number: typeof kanguService.cnpjTransp === 'string'
                 ? kanguService.cnpjTransp.replace(/\D/g, '').substr(0, 19)
                 : undefined,
