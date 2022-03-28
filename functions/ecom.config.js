@@ -166,7 +166,9 @@ const app = {
           "Opcional",
           "preco",
           "prazo"
-        ]
+        ],
+        default: "preco"
+
       },
       hide: false
     },

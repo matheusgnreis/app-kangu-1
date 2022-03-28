@@ -1,3 +1,5 @@
+const axios = require('axios')
+
 exports.post = ({ appSdk }, req, res) => {
   /**
    * Treat `params` and (optionally) `application` from request body to properly mount the `response`.
@@ -28,6 +30,8 @@ exports.post = ({ appSdk }, req, res) => {
       message: 'Token or document unset on app hidden data (merchant must configure the app)'
     })
   }
+
+  const ordernar = appData.ordernar ? appData.ordernar : 'preco'
 
   if (appData.free_shipping_from_value >= 0) {
     response.free_shipping_from_value = appData.free_shipping_from_value
@@ -136,6 +140,7 @@ exports.post = ({ appSdk }, req, res) => {
             valor: ecomUtils.price(item),
             quantidade: quantity,
             produto: name,
+            ordernar
           }
         })
       },
