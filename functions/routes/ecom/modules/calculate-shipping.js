@@ -91,7 +91,27 @@ exports.post = ({ appSdk }, req, res) => {
       token,
       accept: 'application/json',
       'Content-Type': 'application/json'
-  }
+    }
+    let finalWeight = 0
+    params.items.forEach(({ weight }) => {
+      let physicalWeight = 0
+
+      // sum physical weight
+      if (weight && weight.value) {
+        switch (weight.unit) {
+          case 'kg':
+            physicalWeight = weight.value
+            break
+          case 'g':
+            physicalWeight = weight.value / 1000
+            break
+          case 'mg':
+            physicalWeight = weight.value / 1000000
+        }
+      }
+
+      finalWeight += (quantity * physicalWeight)
+    })
     // send POST request to kangu REST API
     return axios.post(
       'https://portal.kangu.com.br/tms/transporte/simular',    
@@ -99,6 +119,12 @@ exports.post = ({ appSdk }, req, res) => {
         cepOrigem: originZip,
         cepDestino: destinationZip,
         origem: 'E-Com Plus',
+        servicos: [ 
+          "E",
+          "X",
+          "R"
+        ],
+        ordernar,
         produtos: params.items.map(item => {
           const { name, quantity, dimensions, weight } = item
           // parse cart items to kangu schema
@@ -140,13 +166,7 @@ exports.post = ({ appSdk }, req, res) => {
             comprimento: cmDimensions.length || 0,
             valor: ecomUtils.price(item),
             quantidade: quantity,
-            produto: name,
-            servicos: [ 
-              "E",
-              "X",
-              "R"
-            ],
-            ordernar
+            produto: name
           }
         })
       },
@@ -173,7 +193,7 @@ exports.post = ({ appSdk }, req, res) => {
           // success response
           result.forEach(kanguService => {
             // parse to E-Com Plus shipping line object
-            const serviceCode = String(kanguService.referencia)
+            const serviceCode = String(kanguService.servico)
             const price = kanguService.vlrFrete
     
             // push shipping service object to response
@@ -201,6 +221,12 @@ exports.post = ({ appSdk }, req, res) => {
                 posting_deadline: {
                   days: 3,
                   ...appData.posting_deadline
+                },
+                package: {
+                  weight: {
+                    value: finalWeight,
+                    unit: 'kg'
+                  }
                 },
                 custom_fields: [
                   {
