@@ -93,7 +93,7 @@ exports.post = ({ appSdk }, req, res) => {
       'Content-Type': 'application/json'
     }
     let finalWeight = 0
-    params.items.forEach(({ weight }) => {
+    params.items.forEach(({ weight, quantity }) => {
       let physicalWeight = 0
 
       // sum physical weight
@@ -126,7 +126,6 @@ exports.post = ({ appSdk }, req, res) => {
         ],
         ordernar,
         produtos: params.items.map(item => {
-          console.log(item)
           const { name, quantity, dimensions, weight } = item
           // parse cart items to kangu schema
           let kgWeight = 0
@@ -166,7 +165,7 @@ exports.post = ({ appSdk }, req, res) => {
             largura: cmDimensions.width || 0,
             comprimento: cmDimensions.length || 0,
             valor: ecomUtils.price(item),
-            quantidade: quantity || 1,
+            quantidade: quantity,
             produto: name
           }
         })
