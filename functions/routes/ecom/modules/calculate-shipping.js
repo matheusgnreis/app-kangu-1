@@ -159,13 +159,14 @@ exports.post = ({ appSdk }, req, res) => {
               }
             }
           }
+          console.log(item)
           return {
             peso: kgWeight,
             altura: cmDimensions.height || 0,
             largura: cmDimensions.width || 0,
             comprimento: cmDimensions.length || 0,
             valor: ecomUtils.price(item),
-            quantidade: quantity,
+            quantidade: quantity || 1,
             produto: name
           }
         })
