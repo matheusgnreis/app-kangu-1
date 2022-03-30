@@ -202,6 +202,16 @@ exports.post = ({ appSdk }, req, res) => {
                   days: 3,
                   ...appData.posting_deadline
                 },
+                custom_fields: [
+                  {
+                    field: 'kangu_reference',
+                    value: String(kanguService.referencia)
+                  },
+                  {
+                    field: 'nfe_required',
+                    value: kanguService.nf_obrig === 'N' ? 'false' : 'true'
+                  }
+                ],
                 flags: ['kangu-ws', `kangu-${serviceCode}`.substr(0, 20)]
               }
             })
