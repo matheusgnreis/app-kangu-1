@@ -126,6 +126,7 @@ exports.post = ({ appSdk }, req, res) => {
         ],
         ordernar,
         produtos: params.items.map(item => {
+          console.log(item)
           const { name, quantity, dimensions, weight } = item
           // parse cart items to kangu schema
           let kgWeight = 0
@@ -159,7 +160,6 @@ exports.post = ({ appSdk }, req, res) => {
               }
             }
           }
-          console.log(item)
           return {
             peso: kgWeight,
             altura: cmDimensions.height || 0,
