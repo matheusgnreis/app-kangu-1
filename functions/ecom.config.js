@@ -243,6 +243,15 @@ const app = {
         }
       },
       hide: false
+    },
+    disable_auto_tag: {
+      schema: {
+        type: 'boolean',
+        default: false,
+        title: 'Desabilitar geração de envios a Kangu',
+        description: 'Desativa a criação automática de tags de envio para Kangu'
+      },
+      hide: false
     }
   }
 }
