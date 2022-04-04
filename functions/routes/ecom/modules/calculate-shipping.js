@@ -41,7 +41,7 @@ exports.post = ({ appSdk }, req, res) => {
   const destinationZip = params.to ? params.to.zip.replace(/\D/g, '') : ''
   const originZip = params.from
     ? params.from.zip.replace(/\D/g, '')
-    : appData.zip ? appData.zip.replace(/\D/g, '') : ''
+    : appData.from.zip ? appData.from.zip.replace(/\D/g, '') : ''
 
   const checkZipCode = rule => {
     // validate rule zip range
@@ -208,6 +208,7 @@ exports.post = ({ appSdk }, req, res) => {
               shipping_line: {
                 from: {
                   ...params.from,
+                  ...appData.from,
                   zip: originZip
                 },
                 to: params.to,
@@ -288,26 +289,6 @@ exports.post = ({ appSdk }, req, res) => {
       message: 'Cannot calculate shipping without cart items'
     })
   }
-
-  // add new shipping service option
-  response.shipping_services.push({
-    label: appData.label || 'My shipping method',
-    carrier: 'My carrier',
-    shipping_line: {
-      from: appData.from,
-      to: params.to,
-      package: {
-        weight: {
-          value: totalWeight
-        }
-      },
-      price: 10,
-      delivery_time: {
-        days: 3,
-        working_days: true
-      }
-    }
-  })
 
   res.send(response)
 }

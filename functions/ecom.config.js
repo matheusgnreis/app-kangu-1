@@ -138,16 +138,6 @@ const app = {
   },
 
   admin_settings: {
-    zip: {
-      schema: {
-        type: 'string',
-        maxLength: 9,
-        pattern: '^[0-9]{5}-?[0-9]{3}$',
-        title: 'CEP de origem',
-        description: 'Código postal do remetente para cálculo do frete'
-      },
-      hide: true
-    },
     kangu_token: {
       schema: {
         type: 'string',
@@ -157,17 +147,102 @@ const app = {
       },
       hide: true
     },
+    from: {
+      schema: {
+        type: 'object',
+        title: 'Remetente',
+        description: 'Configure o endereço para geração de etiquetas.',
+        required: ['zip'],
+        properties: {
+          zip: { 
+            type: 'string', 
+            maxLength: 9,
+            pattern: '^[0-9]{5}-?[0-9]{3}$', 
+            title: 'CEP de origem'
+          },
+          street: { 
+            type: 'string', 
+            maxLength: 200, 
+            title: 'Digite a rua'
+          },
+          number: { 
+            type: 'integer', 
+            min: 1, 
+            max: 9999999, 
+            title: 'Digite o número da residência'
+          },
+          complement: { 
+            type: 'string', 
+            maxLength: 100, 
+            title: 'Complemento'
+          },
+          borough: { 
+            type: 'string', 
+            maxLength: 100, 
+            title: 'Bairro'
+          },
+          city: { 
+            type: 'string', 
+            maxLength: 100, 
+            title: 'Cidade'
+          },
+          province: { 
+            type: 'string', 
+            maxLength: 100, 
+            title: 'Estado'
+          },
+          province_code: {
+            type: 'string',
+            title: "Sigla do Estado",
+            enum: [
+              'AC',
+              'AL',
+              'AP',
+              'AM',
+              'BA',
+              'CE',
+              'DF',
+              'ES',
+              'GO',
+              'MA',
+              'MT',
+              'MS',
+              'MG',
+              'PA',
+              'PB',
+              'PR',
+              'PE', 
+              'PI', 
+              'RR', 
+              'RO', 
+              'RJ', 
+              'RS', 
+              'SC', 
+              'SP', 
+              'SE', 
+              'TO'
+            ]
+          },
+          country: { 
+            type: 'string', 
+            maxLength: 50, 
+            title: 'País' 
+          }
+        }
+      },
+      hide: true
+    },
     ordernar: {
       schema: {
-        title: "Ordenar formas de envio",
-        type: "string",
-        description: "Escolha a ordem que as formas de envio sejam mostradas na loja",
+        title: 'Ordenar formas de envio',
+        type: 'string',
+        description: 'Escolha a ordem que as formas de envio sejam mostradas na loja',
         enum: [
-          "Opcional",
-          "preco",
-          "prazo"
+          'Opcional',
+          'preco',
+          'prazo'
         ],
-        default: "preco"
+        default: 'preco'
 
       },
       hide: false
