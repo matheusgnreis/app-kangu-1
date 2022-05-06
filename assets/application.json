@@ -58,6 +58,11 @@
             "pattern": "^[0-9]{5}-?[0-9]{3}$",
             "title": "CEP de origem"
           },
+          "name": {
+            "type": "string",
+            "maxLength": 70,
+            "title": "Digite seu nome ou da empresa"
+          },
           "street": {
             "type": "string",
             "maxLength": 200,
