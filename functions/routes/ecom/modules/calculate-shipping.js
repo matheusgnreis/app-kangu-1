@@ -84,8 +84,6 @@ exports.post = ({ appSdk }, req, res) => {
     })
   }
 
-
-
   if (params.items) {
     const headers = {
       token,
@@ -114,15 +112,15 @@ exports.post = ({ appSdk }, req, res) => {
     })
     // send POST request to kangu REST API
     return axios.post(
-      'https://portal.kangu.com.br/tms/transporte/simular',    
+      'https://portal.kangu.com.br/tms/transporte/simular',
       {
         cepOrigem: originZip,
         cepDestino: destinationZip,
         origem: 'E-Com Plus',
-        servicos: [ 
-          "E",
-          "X",
-          "R"
+        servicos: [
+          'E',
+          'X',
+          'R'
         ],
         ordernar,
         produtos: params.items.map(item => {
@@ -195,10 +193,13 @@ exports.post = ({ appSdk }, req, res) => {
             // parse to E-Com Plus shipping line object
             const serviceCode = String(kanguService.servico)
             const price = kanguService.vlrFrete
-    
+            const kanguPickup = Array.isArray(kanguService.pontosRetira)
+              ? kanguService.pontosRetira[0]
+              : false
+
             // push shipping service object to response
             response.shipping_services.push({
-              label: kanguService.transp_nome|| kanguService.descricao,
+              label: kanguService.transp_nome || kanguService.descricao,
               carrier: kanguService.transp_nome,
               carrier_doc_number: typeof kanguService.cnpjTransp === 'string'
                 ? kanguService.cnpjTransp.replace(/\D/g, '').substr(0, 19)
@@ -219,6 +220,9 @@ exports.post = ({ appSdk }, req, res) => {
                   days: parseInt(kanguService.prazoEnt, 10),
                   working_days: true
                 },
+                delivery_instructions: kanguPickup
+                  ? `${kanguPickup.nome} - ${kanguPickup.endereco.distancia} m`
+                  : undefined,
                 posting_deadline: {
                   days: 3,
                   ...appData.posting_deadline
@@ -232,7 +236,9 @@ exports.post = ({ appSdk }, req, res) => {
                 custom_fields: [
                   {
                     field: 'kangu_reference',
-                    value: String(kanguService.referencia)
+                    value: kanguPickup
+                      ? String(kanguPickup.referencia)
+                      : String(kanguService.referencia)
                   },
                   {
                     field: 'nfe_required',

@@ -154,46 +154,51 @@ const app = {
         description: 'Configure o endereço para geração de etiquetas.',
         required: ['zip'],
         properties: {
-          zip: { 
-            type: 'string', 
+          zip: {
+            type: 'string',
             maxLength: 9,
-            pattern: '^[0-9]{5}-?[0-9]{3}$', 
+            pattern: '^[0-9]{5}-?[0-9]{3}$',
             title: 'CEP de origem'
           },
-          street: { 
-            type: 'string', 
-            maxLength: 200, 
+          name: {
+            type: 'string',
+            maxLength: 70,
+            title: 'Digite seu nome ou da empresa'
+          },
+          street: {
+            type: 'string',
+            maxLength: 200,
             title: 'Digite a rua'
           },
-          number: { 
-            type: 'integer', 
-            min: 1, 
-            max: 9999999, 
+          number: {
+            type: 'integer',
+            min: 1,
+            max: 9999999,
             title: 'Digite o número da residência'
           },
-          complement: { 
-            type: 'string', 
-            maxLength: 100, 
+          complement: {
+            type: 'string',
+            maxLength: 100,
             title: 'Complemento'
           },
-          borough: { 
-            type: 'string', 
-            maxLength: 100, 
+          borough: {
+            type: 'string',
+            maxLength: 100,
             title: 'Bairro'
           },
-          city: { 
-            type: 'string', 
-            maxLength: 100, 
+          city: {
+            type: 'string',
+            maxLength: 100,
             title: 'Cidade'
           },
-          province: { 
-            type: 'string', 
-            maxLength: 100, 
+          province: {
+            type: 'string',
+            maxLength: 100,
             title: 'Estado'
           },
           province_code: {
             type: 'string',
-            title: "Sigla do Estado",
+            title: 'Sigla do Estado',
             enum: [
               'AC',
               'AL',
@@ -211,22 +216,22 @@ const app = {
               'PA',
               'PB',
               'PR',
-              'PE', 
-              'PI', 
-              'RR', 
-              'RO', 
-              'RJ', 
-              'RS', 
-              'SC', 
-              'SP', 
-              'SE', 
+              'PE',
+              'PI',
+              'RR',
+              'RO',
+              'RJ',
+              'RS',
+              'SC',
+              'SP',
+              'SE',
               'TO'
             ]
           },
-          country: { 
-            type: 'string', 
-            maxLength: 50, 
-            title: 'País' 
+          country: {
+            type: 'string',
+            maxLength: 50,
+            title: 'País'
           }
         }
       },
