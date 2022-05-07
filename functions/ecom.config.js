@@ -147,24 +147,46 @@ const app = {
       },
       hide: true
     },
-    from: {
+    zip: {
+      schema: {
+        type: 'string',
+        maxLength: 9,
+        pattern: '^[0-9]{5}-?[0-9]{3}$',
+        title: 'CEP de origem'
+      },
+      hide: true
+    },
+    seller: {
       schema: {
         type: 'object',
-        title: 'Remetente',
-        description: 'Configure o endereço para geração de etiquetas.',
-        required: ['zip'],
+        title: 'Dados do remetente',
+        description: 'Configure informações de remetente para etiqueta.',
         properties: {
-          zip: {
+          doc_number: {
             type: 'string',
-            maxLength: 9,
-            pattern: '^[0-9]{5}-?[0-9]{3}$',
-            title: 'CEP de origem'
+            maxLength: 20,
+            title: 'CPF/CNPJ sem pontuação'
+          },
+          contact: {
+            type: 'string',
+            maxLength: 100,
+            title: 'Nome do responsável'
           },
           name: {
             type: 'string',
-            maxLength: 70,
-            title: 'Digite seu nome ou da empresa'
-          },
+            maxLength: 100,
+            title: 'Nome da empresa ou loja'
+          }
+        }
+      },
+      hide: true
+    },
+    from: {
+      schema: {
+        type: 'object',
+        title: 'Endereço do remetente',
+        description: 'Configure endereço de remetente para etiqueta.',
+        properties: {
           street: {
             type: 'string',
             maxLength: 200,
@@ -190,11 +212,6 @@ const app = {
             type: 'string',
             maxLength: 100,
             title: 'Cidade'
-          },
-          province: {
-            type: 'string',
-            maxLength: 100,
-            title: 'Estado'
           },
           province_code: {
             type: 'string',
@@ -227,11 +244,6 @@ const app = {
               'SE',
               'TO'
             ]
-          },
-          country: {
-            type: 'string',
-            maxLength: 50,
-            title: 'País'
           }
         }
       },
@@ -323,7 +335,7 @@ const app = {
         }
       },
       hide: false
-    },
+    }/* ,
     disable_auto_tag: {
       schema: {
         type: 'boolean',
@@ -332,7 +344,7 @@ const app = {
         description: 'Desativa a criação automática de tags de envio para Kangu'
       },
       hide: false
-    }
+    } */
   }
 }
 

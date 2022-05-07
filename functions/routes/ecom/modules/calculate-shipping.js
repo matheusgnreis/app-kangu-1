@@ -41,7 +41,7 @@ exports.post = ({ appSdk }, req, res) => {
   const destinationZip = params.to ? params.to.zip.replace(/\D/g, '') : ''
   const originZip = params.from
     ? params.from.zip.replace(/\D/g, '')
-    : appData.from.zip ? appData.from.zip.replace(/\D/g, '') : ''
+    : appData.zip ? appData.zip.replace(/\D/g, '') : ''
 
   const checkZipCode = rule => {
     // validate rule zip range
