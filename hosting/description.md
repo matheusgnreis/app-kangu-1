@@ -1,5 +1,12 @@
 # Kangu
 
-Faça a cotação de fretes de forma simples e rápida em diversos serviços de envio e transportadoras.
+Intermediação de frete dos Correios e Transportadoras com valores mais acessíveis via [Kangu](https://www.kangu.com.br/):
 
-Com o aplicativo do kangu você tem acesso a uma ampla variedade de soluções logísticas, com preços reduzidos e mais sustentáveis.
+- Cálculo de frete consumindo o API Kangu;
+- Permite configuração de regras de envio para aplicação de frete grátis, com desconto, valor adicional ou fixo por região (faixa de CEP) e valor da compra;
+- Geração automática de etiquetas de envio no Kangu (Em breve)
+
+Com o aplicativo você tem acesso a uma ampla variedade de soluções logísticas, com preços reduzidos e mais sustentáveis.
+
+
+
