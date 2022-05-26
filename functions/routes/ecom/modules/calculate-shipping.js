@@ -52,6 +52,32 @@ exports.post = ({ appSdk }, req, res) => {
     return true
   }
 
+  const completeAddress = address => {
+    let { logradouro, numero, complemento, bairro, cidade, distancia } = address
+      let lineAddress
+      if (logradouro) {
+        lineAddress = logradouro
+        if (numero) {
+          lineAddress += ', ' + numero
+        }
+        if (complemento) {
+          lineAddress += ' - ' + complemento
+        }
+        if (bairro) {
+          lineAddress += ', ' + bairro
+        }
+        if (cidade) {
+          lineAddress += ', ' + cidade
+        }
+        if (logradouro) {
+          lineAddress += ' - ' + distancia + 'm'
+        }
+      } else {
+        lineAddress = ''
+      }
+      return lineAddress
+  }
+
   // search for configured free shipping rule
   if (Array.isArray(appData.free_shipping_rules)) {
     for (let i = 0; i < appData.free_shipping_rules.length; i++) {
@@ -166,7 +192,7 @@ exports.post = ({ appSdk }, req, res) => {
         }
       })
     }
-    console.log('Requisicao corpo', body)
+    //console.log('Requisicao corpo', body)
     // send POST request to kangu REST API
     return axios.post(
       'https://portal.kangu.com.br/tms/transporte/simular',
@@ -202,7 +228,9 @@ exports.post = ({ appSdk }, req, res) => {
 
             // push shipping service object to response
             response.shipping_services.push({
-              label: kanguService.transp_nome || kanguService.descricao,
+              label: kanguPickup
+              ? 'Retirar no ponto comercial'
+              : kanguService.transp_nome || kanguService.descricao,
               carrier: kanguService.transp_nome,
               carrier_doc_number: typeof kanguService.cnpjTransp === 'string'
                 ? kanguService.cnpjTransp.replace(/\D/g, '').substr(0, 19)
@@ -224,7 +252,7 @@ exports.post = ({ appSdk }, req, res) => {
                   working_days: true
                 },
                 delivery_instructions: kanguPickup
-                  ? `${kanguPickup.nome} - ${kanguPickup.endereco.distancia} m`
+                  ? `${kanguPickup.nome} - ${completeAddress(kanguPickup.endereco)}`
                   : undefined,
                 posting_deadline: {
                   days: 3,
