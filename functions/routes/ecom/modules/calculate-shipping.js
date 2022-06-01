@@ -229,7 +229,7 @@ exports.post = ({ appSdk }, req, res) => {
             // push shipping service object to response
             response.shipping_services.push({
               label: kanguPickup
-              ? 'Retirar no ponto comercial'
+              ? 'Retirar no parceiro'
               : kanguService.transp_nome || kanguService.descricao,
               carrier: kanguService.transp_nome,
               carrier_doc_number: typeof kanguService.cnpjTransp === 'string'
