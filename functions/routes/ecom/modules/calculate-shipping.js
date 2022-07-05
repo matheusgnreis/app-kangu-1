@@ -113,7 +113,9 @@ exports.post = ({ appSdk }, req, res) => {
   if (params.items) {
     let finalWeight = 0
     let cartSubtotal = 0
-    params.items.forEach(({ weight, quantity, price }) => {
+    const produtos = []
+    params.items.forEach((item) => {
+      const { name, quantity, dimensions, weight } = item
       let physicalWeight = 0
       // sum physical weight
       if (weight && weight.value) {
@@ -129,7 +131,49 @@ exports.post = ({ appSdk }, req, res) => {
         }
       }
       finalWeight += (quantity * physicalWeight)
-      cartSubtotal += (quantity * price)
+      cartSubtotal += (quantity * ecomUtils.price(item))
+
+      // parse cart items to kangu schema
+      let kgWeight = 0
+      if (weight && weight.value) {
+        switch (weight.unit) {
+          case 'g':
+            kgWeight = weight.value / 1000
+            break
+          case 'mg':
+            kgWeight = weight.value / 1000000
+            break
+          default:
+            kgWeight = weight.value
+        }
+      }
+      const cmDimensions = {}
+      if (dimensions) {
+        for (const side in dimensions) {
+          const dimension = dimensions[side]
+          if (dimension && dimension.value) {
+            switch (dimension.unit) {
+              case 'm':
+                cmDimensions[side] = dimension.value * 100
+                break
+              case 'mm':
+                cmDimensions[side] = dimension.value / 10
+                break
+              default:
+                cmDimensions[side] = dimension.value
+            }
+          }
+        }
+      }
+      produtos.push({
+        peso: kgWeight,
+        altura: cmDimensions.height || 0,
+        largura: cmDimensions.width || 0,
+        comprimento: cmDimensions.length || 0,
+        valor: ecomUtils.price(item),
+        quantidade: quantity,
+        produto: name
+      })
     })
 
     const body = {
@@ -142,52 +186,8 @@ exports.post = ({ appSdk }, req, res) => {
         'R'
       ],
       ordernar,
-      produtos: params.items.map(item => {
-        const { name, quantity, dimensions, weight } = item
-        // parse cart items to kangu schema
-        let kgWeight = 0
-        if (weight && weight.value) {
-          switch (weight.unit) {
-            case 'g':
-              kgWeight = weight.value / 1000
-              break
-            case 'mg':
-              kgWeight = weight.value / 1000000
-              break
-            default:
-              kgWeight = weight.value
-          }
-        }
-        const cmDimensions = {}
-        if (dimensions) {
-          for (const side in dimensions) {
-            const dimension = dimensions[side]
-            if (dimension && dimension.value) {
-              switch (dimension.unit) {
-                case 'm':
-                  cmDimensions[side] = dimension.value * 100
-                  break
-                case 'mm':
-                  cmDimensions[side] = dimension.value / 10
-                  break
-                default:
-                  cmDimensions[side] = dimension.value
-              }
-            }
-          }
-        }
-        return {
-          peso: kgWeight,
-          altura: cmDimensions.height || 0,
-          largura: cmDimensions.width || 0,
-          comprimento: cmDimensions.length || 0,
-          valor: ecomUtils.price(item),
-          quantidade: quantity,
-          produto: name
-        }
-      })
+      produtos
     }
-
     // send POST request to kangu REST API
     return axios.post(
       'https://portal.kangu.com.br/tms/transporte/simular',
