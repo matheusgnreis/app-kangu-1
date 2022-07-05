@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## 1.0.0 (2022-07-05)
+
+
+### Features
+
+* add create tag without some info ([90787ba](https://github.com/ecomplus/application-starter/commit/90787ba3d197e22393c71e0b713190904146f81c))
+* add description and icon ([a3c3eef](https://github.com/ecomplus/application-starter/commit/a3c3eef1418e1729727367803e5a16808489b795))
+* add some configurations to pickup ([8e8fe55](https://github.com/ecomplus/application-starter/commit/8e8fe5570f568047fafa34a5df0da276956ec941))
+* **calculate:** add servicos on calculate ([7c3c2da](https://github.com/ecomplus/application-starter/commit/7c3c2dae5b7481a73634b529cd6ec161b13ea309))
+* **calculate:** require axios and add ordenar on calculate ([74fae0d](https://github.com/ecomplus/application-starter/commit/74fae0d24789671ec0a534d6d7f2a3443f1dc438))
+* check if is kangu ([0e26350](https://github.com/ecomplus/application-starter/commit/0e26350a4db4e7d6c41b596a8158d04f8b0189d9))
+* **create-tag:** add create tag and config to do so ([67123b8](https://github.com/ecomplus/application-starter/commit/67123b8d9e3cb430f22937231adaaf03ef1d1e5d))
+
+
+### Bug Fixes
+
+* **calculate shipping:** adjust quantity on calc totalWeight ([b6a82e8](https://github.com/ecomplus/application-starter/commit/b6a82e87fb0486644b315b0ebed1535f1dd3b147))
+* **calculate:** add require ecomUtils ([cb8f01e](https://github.com/ecomplus/application-starter/commit/cb8f01e603c0daf2997a8d91d6629fddd188ec64))
+* **calculate:** remove console and add send response ([6cfa585](https://github.com/ecomplus/application-starter/commit/6cfa5850ba138d10ee8856b8d45b7c90e812085c))
+* **deps:** update all non-major ([6e78f51](https://github.com/ecomplus/application-starter/commit/6e78f510acfaf5fa548abee0699187ea14da5703))
+* **ecom-config:** remove invalid propertie ([9ff0b2f](https://github.com/ecomplus/application-starter/commit/9ff0b2f9ddc79fd3c094e0a8317929a61f346ff1))
+* properly set free shipping when configured and min amount passed ([3df1a8d](https://github.com/ecomplus/application-starter/commit/3df1a8d00a028cc7c3de52994d08858513f16e87))
+* rename origin zip code ([676c047](https://github.com/ecomplus/application-starter/commit/676c0478577214b9b6e19ad63274d30d5fda5a54))
+
 ## [1.0.0-starter.26](https://github.com/ecomplus/application-starter/compare/v1.0.0-starter.25...v1.0.0-starter.26) (2022-02-24)
 
 ## [1.0.0-starter.25](https://github.com/ecomplus/application-starter/compare/v1.0.0-starter.24...v1.0.0-starter.25) (2022-02-24)
