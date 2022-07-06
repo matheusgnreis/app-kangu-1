@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.2](https://github.com/ecomplus/application-starter/compare/v1.0.1...v1.0.2) (2022-07-06)
+
+
+### Bug Fixes
+
+* free shipping for lowest price service option only ([d388cc7](https://github.com/ecomplus/application-starter/commit/d388cc73af90ccaf7c5fefcc9652e6d6d5ddf918))
+
 ### [1.0.1](https://github.com/ecomplus/application-starter/compare/v1.0.0...v1.0.1) (2022-07-05)
 
 
