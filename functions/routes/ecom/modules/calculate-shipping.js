@@ -219,20 +219,17 @@ exports.post = ({ appSdk }, req, res) => {
 
         if (result && Number(status) === 200 && Array.isArray(result)) {
           // success response
+          let lowestPriceShipping
           result.forEach(kanguService => {
             // parse to E-Com Plus shipping line object
             const serviceCode = String(kanguService.servico)
             const price = kanguService.vlrFrete
-            const discount = typeof response.free_shipping_from_value === 'number' &&
-              response.free_shipping_from_value <= cartSubtotal
-              ? price
-              : 0
             const kanguPickup = Array.isArray(kanguService.pontosRetira)
               ? kanguService.pontosRetira[0]
               : false
 
             // push shipping service object to response
-            response.shipping_services.push({
+            const shippingService = {
               label: kanguPickup
                 ? 'Retirar no parceiro'
                 : kanguService.transp_nome || kanguService.descricao,
@@ -250,8 +247,8 @@ exports.post = ({ appSdk }, req, res) => {
                 },
                 to: params.to,
                 price,
-                total_price: price - discount,
-                discount,
+                total_price: price,
+                discount: 0,
                 delivery_time: {
                   days: parseInt(kanguService.prazoEnt, 10),
                   working_days: true
@@ -283,8 +280,24 @@ exports.post = ({ appSdk }, req, res) => {
                 ],
                 flags: ['kangu-ws', `kangu-${serviceCode}`.substr(0, 20)]
               }
-            })
+            }
+            if (!lowestPriceShipping || lowestPriceShipping.price > price) {
+              lowestPriceShipping = shippingService.shipping_line
+            }
+            response.shipping_services.push(shippingService)
           })
+
+          if (lowestPriceShipping) {
+            const { price } = lowestPriceShipping
+            const discount = typeof response.free_shipping_from_value === 'number' &&
+              response.free_shipping_from_value <= cartSubtotal
+              ? price
+              : 0
+            if (discount) {
+              lowestPriceShipping.total_price = price - discount
+              lowestPriceShipping.discount = discount
+            }
+          }
           res.send(response)
         } else {
           // console.log(data)
