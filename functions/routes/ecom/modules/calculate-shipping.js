@@ -15,7 +15,7 @@ exports.post = ({ appSdk }, req, res) => {
    */
 
   const { params, application } = req.body
-  const { storeId } = req
+  // const { storeId } = req
   // setup basic required response object
   const response = {
     shipping_services: []
@@ -53,29 +53,29 @@ exports.post = ({ appSdk }, req, res) => {
   }
 
   const completeAddress = address => {
-    let { logradouro, numero, complemento, bairro, cidade, distancia } = address
-      let lineAddress
-      if (logradouro) {
-        lineAddress = logradouro
-        if (numero) {
-          lineAddress += ', ' + numero
-        }
-        if (complemento) {
-          lineAddress += ' - ' + complemento
-        }
-        if (bairro) {
-          lineAddress += ', ' + bairro
-        }
-        if (cidade) {
-          lineAddress += ', ' + cidade
-        }
-        if (logradouro) {
-          lineAddress += ' - ' + distancia + 'm'
-        }
-      } else {
-        lineAddress = ''
+    const { logradouro, numero, complemento, bairro, cidade, distancia } = address
+    let lineAddress
+    if (logradouro) {
+      lineAddress = logradouro
+      if (numero) {
+        lineAddress += ', ' + numero
       }
-      return lineAddress
+      if (complemento) {
+        lineAddress += ' - ' + complemento
+      }
+      if (bairro) {
+        lineAddress += ', ' + bairro
+      }
+      if (cidade) {
+        lineAddress += ', ' + cidade
+      }
+      if (logradouro) {
+        lineAddress += ' - ' + distancia + 'm'
+      }
+    } else {
+      lineAddress = ''
+    }
+    return lineAddress
   }
 
   // search for configured free shipping rule
@@ -111,15 +111,12 @@ exports.post = ({ appSdk }, req, res) => {
   }
 
   if (params.items) {
-    const headers = {
-      token,
-      accept: 'application/json',
-      'Content-Type': 'application/json'
-    }
     let finalWeight = 0
-    params.items.forEach(({ weight, quantity }) => {
+    let cartSubtotal = 0
+    const produtos = []
+    params.items.forEach((item) => {
+      const { name, quantity, dimensions, weight } = item
       let physicalWeight = 0
-
       // sum physical weight
       if (weight && weight.value) {
         switch (weight.unit) {
@@ -133,8 +130,50 @@ exports.post = ({ appSdk }, req, res) => {
             physicalWeight = weight.value / 1000000
         }
       }
-
       finalWeight += (quantity * physicalWeight)
+      cartSubtotal += (quantity * ecomUtils.price(item))
+
+      // parse cart items to kangu schema
+      let kgWeight = 0
+      if (weight && weight.value) {
+        switch (weight.unit) {
+          case 'g':
+            kgWeight = weight.value / 1000
+            break
+          case 'mg':
+            kgWeight = weight.value / 1000000
+            break
+          default:
+            kgWeight = weight.value
+        }
+      }
+      const cmDimensions = {}
+      if (dimensions) {
+        for (const side in dimensions) {
+          const dimension = dimensions[side]
+          if (dimension && dimension.value) {
+            switch (dimension.unit) {
+              case 'm':
+                cmDimensions[side] = dimension.value * 100
+                break
+              case 'mm':
+                cmDimensions[side] = dimension.value / 10
+                break
+              default:
+                cmDimensions[side] = dimension.value
+            }
+          }
+        }
+      }
+      produtos.push({
+        peso: kgWeight,
+        altura: cmDimensions.height || 0,
+        largura: cmDimensions.width || 0,
+        comprimento: cmDimensions.length || 0,
+        valor: ecomUtils.price(item),
+        quantidade: quantity,
+        produto: name
+      })
     })
 
     const body = {
@@ -147,57 +186,19 @@ exports.post = ({ appSdk }, req, res) => {
         'R'
       ],
       ordernar,
-      produtos: params.items.map(item => {
-        const { name, quantity, dimensions, weight } = item
-        // parse cart items to kangu schema
-        let kgWeight = 0
-        if (weight && weight.value) {
-          switch (weight.unit) {
-            case 'g':
-              kgWeight = weight.value / 1000
-              break
-            case 'mg':
-              kgWeight = weight.value / 1000000
-              break
-            default:
-              kgWeight = weight.value
-          }
-        }
-        const cmDimensions = {}
-        if (dimensions) {
-          for (const side in dimensions) {
-            const dimension = dimensions[side]
-            if (dimension && dimension.value) {
-              switch (dimension.unit) {
-                case 'm':
-                  cmDimensions[side] = dimension.value * 100
-                  break
-                case 'mm':
-                  cmDimensions[side] = dimension.value / 10
-                  break
-                default:
-                  cmDimensions[side] = dimension.value
-              }
-            }
-          }
-        }
-        return {
-          peso: kgWeight,
-          altura: cmDimensions.height || 0,
-          largura: cmDimensions.width || 0,
-          comprimento: cmDimensions.length || 0,
-          valor: ecomUtils.price(item),
-          quantidade: quantity,
-          produto: name
-        }
-      })
+      produtos
     }
-    //console.log('Requisicao corpo', body)
     // send POST request to kangu REST API
     return axios.post(
       'https://portal.kangu.com.br/tms/transporte/simular',
       body,
-      { headers }
+      {
+        headers: {
+          token,
+          accept: 'application/json',
+          'Content-Type': 'application/json'
+        }
+      }
     )
 
       .then(({ data, status }) => {
@@ -218,6 +219,7 @@ exports.post = ({ appSdk }, req, res) => {
 
         if (result && Number(status) === 200 && Array.isArray(result)) {
           // success response
+          let lowestPriceShipping
           result.forEach(kanguService => {
             // parse to E-Com Plus shipping line object
             const serviceCode = String(kanguService.servico)
@@ -227,10 +229,10 @@ exports.post = ({ appSdk }, req, res) => {
               : false
 
             // push shipping service object to response
-            response.shipping_services.push({
+            const shippingService = {
               label: kanguPickup
-              ? 'Retirar no parceiro'
-              : kanguService.transp_nome || kanguService.descricao,
+                ? 'Retirar no parceiro'
+                : kanguService.transp_nome || kanguService.descricao,
               carrier: kanguService.transp_nome,
               carrier_doc_number: typeof kanguService.cnpjTransp === 'string'
                 ? kanguService.cnpjTransp.replace(/\D/g, '').substr(0, 19)
@@ -278,8 +280,24 @@ exports.post = ({ appSdk }, req, res) => {
                 ],
                 flags: ['kangu-ws', `kangu-${serviceCode}`.substr(0, 20)]
               }
-            })
+            }
+            if (!lowestPriceShipping || lowestPriceShipping.price > price) {
+              lowestPriceShipping = shippingService.shipping_line
+            }
+            response.shipping_services.push(shippingService)
           })
+
+          if (lowestPriceShipping) {
+            const { price } = lowestPriceShipping
+            const discount = typeof response.free_shipping_from_value === 'number' &&
+              response.free_shipping_from_value <= cartSubtotal
+              ? price
+              : 0
+            if (discount) {
+              lowestPriceShipping.total_price = price - discount
+              lowestPriceShipping.discount = discount
+            }
+          }
           res.send(response)
         } else {
           // console.log(data)
