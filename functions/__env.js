@@ -7,7 +7,7 @@ if (!projectId && FIREBASE_CONFIG) {
   projectId = JSON.parse(FIREBASE_CONFIG).projectId
 }
 const region = FUNCTION_REGION || 'us-central1'
-const functionName = server.functionName || 'app'
+const functionName = 'app'
 
 module.exports = {
   functionName,
