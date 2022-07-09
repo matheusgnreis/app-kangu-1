@@ -1,9 +1,10 @@
 // E-Com Plus Procedures to register
 const { procedures } = require('./../../ecom.config')
+const updateAppData = require('../store-api/update-app-data')
 // handle Store API errors
 const errorHandling = require('./../../lib/store-api/error-handling')
 
-exports.post = ({ appSdk }, req, res) => {
+exports.post = ({ appSdk, auth }, req, res) => {
   const { storeId } = req
 
   // handle callback with E-Com Plus app SDK
@@ -12,6 +13,48 @@ exports.post = ({ appSdk }, req, res) => {
     .then(({ isNew, authenticationId }) => {
       if (isNew) {
         console.log(`Installing store #${storeId}`)
+        appSdk.apiRequest(storeId, '/me', 'GET')
+          .then(({ response }) => {
+            const { data } = response
+            const seller = {}
+            const from = {}
+            if (data.doc_number) {
+              seller.doc_number = data.doc_number
+            }
+            seller.name = data.corporate_name || data.name || 'Nome da loja'
+            if (data.address) {
+              const address = data.address.split(',')
+                [
+                  'street',
+                  'number',
+                  'borough',
+                  'city',
+                  'province_code',
+                  'complement'
+                ].forEach((field, i) => {
+                  from[field] = address[i] || undefined
+                  from[field] = from[field].trim()
+                })
+            }
+            updateAppData({ appSdk, storeId, auth }, {
+              seller,
+              from
+            })
+          })
+          .catch(err => {
+            const { message, response } = err
+            if (response) {
+              errorHandling(err)
+            } else {
+              // Firestore error ?
+              console.error(err)
+            }
+            res.status(500)
+            res.send({
+              error: 'not_req_me',
+              message
+            })
+          })
         /**
          * You may also want to send request to external server here:
 
