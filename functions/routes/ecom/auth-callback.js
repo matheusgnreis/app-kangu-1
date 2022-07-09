@@ -1,6 +1,6 @@
 // E-Com Plus Procedures to register
 const { procedures } = require('./../../ecom.config')
-const updateAppData = require('../store-api/update-app-data')
+const updateAppData = require('../../lib/store-api/get-app-data')
 // handle Store API errors
 const errorHandling = require('./../../lib/store-api/error-handling')
 
