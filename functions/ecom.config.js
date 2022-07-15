@@ -84,7 +84,7 @@ const app = {
     orders: [
       'GET',           // List/read orders with public and private fields
       // 'POST',          // Create orders
-      // 'PATCH',         // Edit orders
+      'PATCH',         // Edit orders
       // 'PUT',           // Overwrite orders
       // 'DELETE',        // Delete orders
     ],
@@ -349,7 +349,7 @@ const app = {
     shipping_rules: {
       schema: {
         title: 'Regras de envio',
-        description: 'Aplicar descontos/adicionais condicionados ou desabilitar regiões',
+        description: 'Aplicar descontos/adicionais condiciAtivar regiões',
         type: 'array',
         maxItems: 300,
         items: {
@@ -445,17 +445,16 @@ const app = {
         }
       },
       hide: true
-    }
-    /* ,
-    disable_auto_tag: {
+    },
+    enable_auto_tag: {
       schema: {
         type: 'boolean',
         default: false,
-        title: 'Desabilitar geração de envios a Kangu',
-        description: 'Desativa a criação automática de tags de envio para Kangu'
+        title: 'Ativar geração de envios a Kangu',
+        description: 'Ativar a criação automática de tags de envio para Kangu'
       },
       hide: false
-    } */
+    }
   }
 }
 

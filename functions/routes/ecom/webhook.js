@@ -1,5 +1,6 @@
 // read configured E-Com Plus app data
 const getAppData = require('./../../lib/store-api/get-app-data')
+const createTag = require('../../lib/kangu/create-tag')
 
 const SKIP_TRIGGER_NAME = 'SkipTrigger'
 const ECHO_SUCCESS = 'SUCCESS'
@@ -17,7 +18,12 @@ exports.post = ({ appSdk }, req, res) => {
   const trigger = req.body
 
   // get app configured options
-  getAppData({ appSdk, storeId })
+  let auth
+  appSdk.getAuth(storeId)
+    .then(_auth => {
+      auth = _auth
+      return getAppData({ appSdk, storeId, auth })
+    })
 
     .then(appData => {
       if (
@@ -31,7 +37,72 @@ exports.post = ({ appSdk }, req, res) => {
       }
 
       /* DO YOUR CUSTOM STUFF HERE */
+      const { token } = appData
+      if (appData.enable_auto_tag && token && trigger.resource === 'orders') {
+        // handle order fulfillment status changes
+        const order = trigger.body
+        if (
+          order &&
+          order.fulfillment_status &&
+          order.fulfillment_status.current === 'ready_for_shipping'
+        ) {
+          // read full order body
+          const resourceId = trigger.resource_id
+          return appSdk.apiRequest(storeId, `/orders/${resourceId}.json`, 'GET', null, auth)
+            .then(({ response }) => {
+              const order = response.data
+              if (order && order.shipping_lines[0] && order.shipping_lines[0].app && order.shipping_lines[0].app.service_name.toLowerCase().indexOf('kangu') === -1) {
+                return res.send(ECHO_SKIP)
+              }
+              console.log(`Shipping tag for #${storeId} ${order._id}`)
+              return createTag(order, token, appData, appSdk, auth)
+                .then(data => {
+                  console.log(`>> Etiqueta Criada Com Sucesso #${storeId} ${resourceId}`)
+                  // updates hidden_metafields with the generated tag id
+                  return appSdk.apiRequest(
+                    storeId,
+                    `/orders/${resourceId}/hidden_metafields.json`,
+                    'POST',
+                    {
+                      namespace: 'app-kangu',
+                      field: 'rastreio',
+                      value: data.codigo
+                    }
+                  ).then(() => data)
+                })
 
+                .then(data => {
+                  if (data.etiquetas.length) {
+                    const shippingLine = order.shipping_lines[0]
+                    if (shippingLine) {
+                      const trackingCodes = shippingLine.tracking_codes || []
+                      trackingCodes.push({
+                        code: data.etiquetas[0].numeroTransp,
+                        link: `https://www.melhorrastreio.com.br/rastreio/${data.etiquetas[0].numeroTransp}`
+                      })
+                      return appSdk.apiRequest(
+                        storeId,
+                        `/orders/${resourceId}/shipping_lines/${shippingLine._id}.json`,
+                        'PATCH',
+                        { tracking_codes: trackingCodes }
+                      )
+                    }
+                  }
+                  return null
+                })
+
+                .then(() => {
+                  console.log(`>> 'hidden_metafields' do pedido ${order._id} atualizado com sucesso!`)
+                  // done
+                  res.send(ECHO_SUCCESS)
+                })
+            })
+        }
+      }
+    })
+
+
+    .then(() => {
       // all done
       res.send(ECHO_SUCCESS)
     })

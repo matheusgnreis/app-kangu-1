@@ -24,14 +24,7 @@ exports.post = ({ appSdk, auth }, req, res) => {
             seller.name = data.corporate_name || data.name || 'Nome da loja'
             if (data.address) {
               const address = data.address.split(',')
-                [
-                  'street',
-                  'number',
-                  'borough',
-                  'city',
-                  'province_code',
-                  'complement'
-                ].forEach((field, i) => {
+                ['street', 'number', 'borough', 'city', 'province_code', 'complement'].forEach((field, i) => {
                   from[field] = address[i] || undefined
                   from[field] = from[field].trim()
                 })
