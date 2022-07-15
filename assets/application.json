@@ -21,7 +21,8 @@
     "categories": [],
     "customers": [],
     "orders": [
-      "GET"
+      "GET",
+      "PATCH"
     ],
     "carts": [],
     "orders/fulfillments": [
@@ -246,7 +247,7 @@
     "shipping_rules": {
       "schema": {
         "title": "Regras de envio",
-        "description": "Aplicar descontos/adicionais condicionados ou desabilitar regiões",
+        "description": "Aplicar descontos/adicionais condiciAtivar regiões",
         "type": "array",
         "maxItems": 300,
         "items": {
@@ -342,6 +343,15 @@
         }
       },
       "hide": true
+    },
+    "enable_auto_tag": {
+      "schema": {
+        "type": "boolean",
+        "default": false,
+        "title": "Ativar geração de envios a Kangu",
+        "description": "Ativar a criação automática de tags de envio para Kangu"
+      },
+      "hide": false
     }
   },
   "auth_callback_uri": "https://us-central1-ecom-kangu-1.cloudfunctions.net/app/ecom/auth-callback",
