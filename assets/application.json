@@ -15,7 +15,9 @@
     "stores/me": [
       "GET"
     ],
-    "procedures": [],
+    "procedures": [
+      "POST"
+    ],
     "products": [],
     "brands": [],
     "categories": [],
@@ -27,6 +29,10 @@
     "carts": [],
     "orders/fulfillments": [
       "POST"
+    ],
+    "orders/shipping_lines": [
+      "GET",
+      "PATCH"
     ],
     "orders/payments_history": [],
     "products/quantity": [],
