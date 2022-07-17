@@ -18,6 +18,7 @@ exports.post = ({ appSdk }, req, res) => {
   const trigger = req.body
 
   // get app configured options
+  console.log('Webhook', trigger)
   let auth
   appSdk.getAuth(storeId)
     .then(_auth => {
@@ -38,6 +39,9 @@ exports.post = ({ appSdk }, req, res) => {
 
       /* DO YOUR CUSTOM STUFF HERE */
       const { token } = appData
+      console.log('Auto tag is:', appData.enable_auto_tag)
+      console.log('meu token é: ', token)
+      console.log('meu triiger resource é: ', trigger.resource)
       if (appData.enable_auto_tag && token && trigger.resource === 'orders') {
         // handle order fulfillment status changes
         const order = trigger.body
@@ -48,6 +52,7 @@ exports.post = ({ appSdk }, req, res) => {
         ) {
           // read full order body
           const resourceId = trigger.resource_id
+          console.log('Trigger disparado para enviar tag com id:', resourceId)
           return appSdk.apiRequest(storeId, `/orders/${resourceId}.json`, 'GET', null, auth)
             .then(({ response }) => {
               const order = response.data
