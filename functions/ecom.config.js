@@ -51,7 +51,7 @@ const app = {
       'GET'            // Read store info
     ],
     procedures: [
-      //'POST'           // Create procedures to receive webhooks
+      'POST'           // Create procedures to receive webhooks
     ],
     products: [
       // 'GET',           // Read products with public and private fields
@@ -99,10 +99,14 @@ const app = {
     /**
      * Prefer using 'fulfillments' and 'payment_history' subresources to manipulate update order status.
      */
-    'orders/fulfillments': [
+     'orders/fulfillments': [
       // 'GET',           // List/read order fulfillment and tracking events
-      'POST',          // Create fulfillment event with new status
+      'POST',             // Create fulfillment event with new status
       // 'DELETE',        // Delete fulfillment event
+    ],
+    'orders/shipping_lines': [
+      'GET',              // List/read order shipping lines
+      'PATCH',            // Edit order shipping line nested object
     ],
     'orders/payments_history': [
       // 'GET',           // List/read order payments history events
