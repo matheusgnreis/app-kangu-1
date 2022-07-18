@@ -7,7 +7,7 @@
 
 const app = {
   app_id: 102707,
-  title: 'Kangu TTTTT',
+  title: 'Kangu TESte',
   slug: 'kangu',
   type: 'external',
   state: 'active',
