@@ -100,7 +100,7 @@ const app = {
      * Prefer using 'fulfillments' and 'payment_history' subresources to manipulate update order status.
      */
      'orders/fulfillments': [
-      // 'GET',           // List/read order fulfillment and tracking events
+      'GET',           // List/read order fulfillment and tracking events
       'POST',             // Create fulfillment event with new status
       // 'DELETE',        // Delete fulfillment event
     ],
