@@ -13,7 +13,7 @@ exports.post = ({ appSdk, auth }, req, res) => {
     .then(({ isNew, authenticationId }) => {
       if (isNew) {
         console.log(`Installing store #${storeId}`)
-        appSdk.apiRequest(storeId, '/me', 'GET')
+        appSdk.apiRequest(storeId, '/me', 'GET', null, auth)
           .then(({ response }) => {
             const { data } = response
             const seller = {}
@@ -36,6 +36,9 @@ exports.post = ({ appSdk, auth }, req, res) => {
           })
           .catch(err => {
             const { message, response } = err
+            console.log(message)
+            console.log('------')
+            console.log(response)
             if (response) {
               errorHandling(err)
             } else {
