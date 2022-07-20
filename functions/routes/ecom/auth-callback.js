@@ -13,7 +13,7 @@ exports.post = ({ appSdk, auth }, req, res) => {
     .then(({ isNew, authenticationId }) => {
       if (isNew) {
         console.log(`Installing store #${storeId}`)
-        appSdk.apiRequest(storeId, '/me', 'GET', null, auth)
+        appSdk.apiRequest(storeId, '/authentications/me', 'GET', null, auth)
           .then(({ response }) => {
             const { data } = response
             const seller = {}
