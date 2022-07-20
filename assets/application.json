@@ -28,6 +28,7 @@
     ],
     "carts": [],
     "orders/fulfillments": [
+      "GET",
       "POST"
     ],
     "orders/shipping_lines": [
