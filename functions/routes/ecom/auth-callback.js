@@ -14,7 +14,7 @@ exports.post = ({ appSdk, auth }, req, res) => {
      if (isNew) {
         console.log(authenticationId)
         console.log(`Installing store #${storeId}`)
-        appSdk.apiRequest(storeId, '/stores/me.json', 'GET', null, auth)
+        appSdk.apiRequest(storeId, '/stores/me.json', 'GET')
           .then((response) => {
             console.log('Erro', response)
             const { data } = response
