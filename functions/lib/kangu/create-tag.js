@@ -24,6 +24,7 @@ module.exports = (order, token, storeId, appData, appSdk, auth) => {
   }
 
   const getEcomProduct = (appSdk, storeId, auth, productId) => {
+    console.log('Vamos de auth', auth)
     const resource = `/products/${productId}.json`
     appSdk.apiRequest(storeId, resource, 'GET', null, auth)
     .then(response => {
