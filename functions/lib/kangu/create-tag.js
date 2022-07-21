@@ -48,8 +48,10 @@ module.exports = (order, token, storeId, appData, appSdk, auth) => {
   const { items } = order
   const newItems = []
   items.forEach(item => {
+    console.log(item)
     appSdk.apiRequest(storeId, `/products/${item.product_id}.json`, 'GET',null, auth)
     .then(response => {
+      console.log(response)
       newItems.push(response.data)
     })
   })
@@ -57,9 +59,8 @@ module.exports = (order, token, storeId, appData, appSdk, auth) => {
 
   // start parsing order body
   if (order.items) {
-    data.produtos = order.items.map(async item => {
-      const product = await getEcomProduct(appSdk, auth, storeId, item.product_id)
-      const { name, quantity, dimensions, weight } = product
+      newItems.forEach(product => {
+        const { name, quantity, dimensions, weight } = product
       // parse cart items to kangu schema
       let kgWeight = 0
       if (weight && weight.value) {
@@ -102,6 +103,7 @@ module.exports = (order, token, storeId, appData, appSdk, auth) => {
         produto: name
       }
     })
+      
   }
   // config source
   data.origem = 'E-Com Plus'
