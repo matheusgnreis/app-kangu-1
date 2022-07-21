@@ -23,19 +23,17 @@ module.exports = (order, token, storeId, appData, appSdk, auth) => {
     }
   }
 
-  const getEcomProduct = async (productId) => {
-    try {
-      const resource = `/products/${productId}.json`
-      const {
-        response: { data }
-      } = await appSdk.apiRequest(storeId, resource, 'GET', null, auth)
-      return data
-    } catch (error) {
-      if (error && error.response) {
-        console.error({ data: error.response.data })
-      }
-      throw error
-    }
+  const getEcomProduct = (appSdk, storeId, auth, orderId) => {
+    const resource = `/products/${productId}.json`
+      return new Promise((resolve, reject) => {
+        appSdk.apiRequest(storeId, resource, 'GET', null, auth)
+          .then(({ response }) => {
+            resolve({ response })
+          })
+          .catch((err) => {
+            reject(err)
+          })
+      })
   }
 
   const hasInvoice = (order) => {
@@ -54,7 +52,7 @@ module.exports = (order, token, storeId, appData, appSdk, auth) => {
     })
     return Promise.all(promises)
   }
-  const listAllItems = listItems(items)
+  const listAllItems = await listItems(items)
 
   // start parsing order body
   if (items) {
