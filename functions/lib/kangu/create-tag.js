@@ -23,12 +23,13 @@ module.exports = (order, token, storeId, appData, appSdk, auth) => {
     }
   }
 
-  const getEcomProduct = async (appSdk, auth, storeId, productId) => {
+  const getEcomProduct = async (productId) => {
     try {
       const resource = `/products/${productId}.json`
       const {
         response: { data }
       } = await appSdk.apiRequest(storeId, resource, 'GET', null, auth)
+      console.log(data)
       return data
     } catch (error) {
       if (error && error.response) {
@@ -45,22 +46,12 @@ module.exports = (order, token, storeId, appData, appSdk, auth) => {
   }
 
   const sendType = hasInvoice(order) ? 'N' : 'D'
-  const { items } = order
-  const newItems = []
-  items.forEach(item => {
-    console.log(item)
-    appSdk.apiRequest(storeId, `/products/${item.product_id}.json`, 'GET',null, auth)
-    .then(response => {
-      console.log(response)
-      newItems.push(response.data)
-    })
-  })
-  console.log(newItems)
 
   // start parsing order body
   if (order.items) {
-      newItems.forEach(product => {
-        const { name, quantity, dimensions, weight } = product
+    data.produtos = order.items.map(async item => {
+      const product = await getEcomProduct(item.product_id)
+      const { name, quantity, dimensions, weight } = product
       // parse cart items to kangu schema
       let kgWeight = 0
       if (weight && weight.value) {
@@ -103,7 +94,6 @@ module.exports = (order, token, storeId, appData, appSdk, auth) => {
         produto: name
       }
     })
-      
   }
   // config source
   data.origem = 'E-Com Plus'
