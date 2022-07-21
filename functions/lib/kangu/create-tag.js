@@ -83,7 +83,7 @@ module.exports = (order, token, storeId, appData, appSdk, auth) => {
           }
         }
       }
-      return ({
+      data.produto.push({
         peso: kgWeight,
         altura: cmDimensions.height || 0,
         largura: cmDimensions.width || 0,
