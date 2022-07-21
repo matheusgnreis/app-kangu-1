@@ -1,7 +1,7 @@
 const axios = require('axios')
 const ecomUtils = require('@ecomplus/utils')
 
-module.exports = (order, token, storeId, appData, appSdk, auth) => {
+module.exports = async (order, token, storeId, appData, appSdk, auth) => {
 // create new shipping tag with Kangu
 // https://portal.kangu.com.br/docs/api/transporte/#/
   const headers = {
