@@ -12,10 +12,11 @@ exports.post = ({ appSdk, auth }, req, res) => {
   appSdk.handleCallback(storeId, req.body)
     .then(({ isNew, authenticationId }) => {
      if (isNew) {
+        console.log(authenticationId)
         console.log(`Installing store #${storeId}`)
         appSdk.apiRequest(storeId, '/stores/me.json', 'GET', null, auth)
           .then((response) => {
-            console.log('Erro', JSON.stringify(response))
+            console.log('Erro', response)
             const { data } = response
             console.log(data)
             const seller = {}
