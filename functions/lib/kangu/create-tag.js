@@ -1,7 +1,7 @@
 const axios = require('axios')
 const ecomUtils = require('@ecomplus/utils')
 
-module.exports = async (order, token, storeId, appData, appSdk, auth) => {
+module.exports = (order, token, storeId, appData, appSdk, auth) => {
 // create new shipping tag with Kangu
 // https://portal.kangu.com.br/docs/api/transporte/#/
   const headers = {
@@ -23,17 +23,17 @@ module.exports = async (order, token, storeId, appData, appSdk, auth) => {
     }
   }
 
-  const getEcomProduct = (appSdk, storeId, auth, orderId) => {
+  const getEcomProduct = (appSdk, storeId, auth, productId) => {
     const resource = `/products/${productId}.json`
-      return new Promise((resolve, reject) => {
-        appSdk.apiRequest(storeId, resource, 'GET', null, auth)
-          .then(({ response }) => {
-            resolve({ response })
-          })
-          .catch((err) => {
-            reject(err)
-          })
-      })
+    appSdk.apiRequest(storeId, resource, 'GET', null, auth)
+    .then(response => {
+      console.log('Olá busquei o produto: ', response)
+      const { data } = response
+      return data
+    })
+    .catch(err => {
+      console.error(err)
+    })     
   }
 
   const hasInvoice = (order) => {
@@ -45,20 +45,12 @@ module.exports = async (order, token, storeId, appData, appSdk, auth) => {
   const sendType = hasInvoice(order) ? 'N' : 'D'
   const { items } = order
 
-  const listItems = items => {
-    const promises = []
-    items.forEach(item => {
-      promises.push(getEcomProduct(item.product_id))
-    })
-    return Promise.all(promises)
-  }
-  const listAllItems = await listItems(items)
-
   // start parsing order body
   if (items) {
     data.produtos = []
-    listAllItems.map(item => {
-      const { name, quantity, dimensions, weight } = item
+    listAllItems.map(async item => {
+      const product = await getEcomProduct(appSdk, storeId, auth, item.product_id)
+      const { name, quantity, dimensions, weight } = product
       // parse cart items to kangu schema
       let kgWeight = 0
       if (weight && weight.value) {
