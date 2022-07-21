@@ -47,8 +47,8 @@ module.exports = (order, token, storeId, appData, appSdk, auth) => {
 
   // start parsing order body
   if (items) {
-    data.produtos = []
-    listAllItems.map(async item => {
+    data.produto = []
+    items.forEach(async item => {
       const product = await getEcomProduct(appSdk, storeId, auth, item.product_id)
       const { name, quantity, dimensions, weight } = product
       // parse cart items to kangu schema
