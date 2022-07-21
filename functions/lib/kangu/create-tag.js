@@ -46,12 +46,17 @@ module.exports = (order, token, storeId, appData, appSdk, auth) => {
   }
 
   const sendType = hasInvoice(order) ? 'N' : 'D'
+  const newItems = []
+  order.items.forEach(async item => {
+    const product = await getEcomProduct(item.product_id)
+    newItems.push(product)
+  })
 
   // start parsing order body
   if (order.items) {
-    data.produtos = order.items.map(async item => {
-      const product = await getEcomProduct(item.product_id)
-      const { name, quantity, dimensions, weight } = product
+    data.produtos = []
+      newItems.forEach(item => {
+      const { name, quantity, dimensions, weight } = item
       // parse cart items to kangu schema
       let kgWeight = 0
       if (weight && weight.value) {
@@ -84,7 +89,7 @@ module.exports = (order, token, storeId, appData, appSdk, auth) => {
           }
         }
       }
-      return {
+      data.produtos.push({
         peso: kgWeight,
         altura: cmDimensions.height || 0,
         largura: cmDimensions.width || 0,
@@ -92,7 +97,7 @@ module.exports = (order, token, storeId, appData, appSdk, auth) => {
         valor: ecomUtils.price(item),
         quantidade: quantity,
         produto: name
-      }
+      })
     })
   }
   // config source
