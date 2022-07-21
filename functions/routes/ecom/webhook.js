@@ -37,11 +37,7 @@ exports.post = ({ appSdk }, req, res) => {
       }
 
       /* DO YOUR CUSTOM STUFF HERE */
-      console.log(appData)
       const { kangu_token } = appData
-      console.log('Auto tag is:', appData.enable_auto_tag)
-      console.log('meu kangu_token é: ', kangu_token)
-      console.log('meu triiger resource é: ', trigger.resource)
       if (appData.enable_auto_tag && kangu_token && trigger.resource === 'orders') {
         // handle order fulfillment status changes
         const order = trigger.body

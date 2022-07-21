@@ -48,8 +48,8 @@ module.exports = (order, token, storeId, appData, appSdk, auth) => {
 
   // start parsing order body
   if (order.items) {
-    data.produtos = order.items.map(item => {
-      const product = getEcomProduct(appSdk, auth, storeId, item._id)
+    data.produtos = order.items.map(async item => {
+      const product = await getEcomProduct(appSdk, auth, storeId, item._id)
       const { name, quantity, dimensions, weight } = product
       // parse cart items to kangu schema
       let kgWeight = 0
@@ -125,9 +125,9 @@ module.exports = (order, token, storeId, appData, appSdk, auth) => {
         if (shippingLine.from) {
           data.remetente = {}
           if (appData.seller) {
-            data.remetente.nome = appData.seller.name || 'Matheus GUedes'
-            data.remetente.cnpjCpf = appData.seller.doc_number || '08728398696'
-            data.remetente.contato = appData.seller.contact || 'Matheus Guedes'
+            data.remetente.nome = appData.seller.name
+            data.remetente.cnpjCpf = appData.seller.doc_number
+            data.remetente.contato = appData.seller.contact
           }
           data.remetente.endereco = {
             logradouro: shippingLine.from.street,
