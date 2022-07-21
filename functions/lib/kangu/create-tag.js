@@ -54,10 +54,10 @@ module.exports = (order, token, storeId, appData, appSdk, auth) => {
     })
     return Promise.all(promises)
   }
+  const listAllItems = listItems(items)
 
   // start parsing order body
   if (items) {
-    const listAllItems = listItems(items)
     data.produtos = []
     listAllItems.map(item => {
       const { name, quantity, dimensions, weight } = item
