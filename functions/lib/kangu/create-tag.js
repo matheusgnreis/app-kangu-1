@@ -48,59 +48,64 @@ module.exports = (order, token, storeId, appData, appSdk, auth) => {
   const { items } = order
 
   // start parsing order body
-  if (items) {
-    data.produto = []
-    items.forEach(item => {
-      getEcomProduct(appSdk, storeId, auth, item.product_id)
-      .then(product => {
-        const { name, quantity, dimensions, weight } = product
-      // parse cart items to kangu schema
-      let kgWeight = 0
-      if (weight && weight.value) {
-        switch (weight.unit) {
-          case 'g':
-            kgWeight = weight.value / 1000
-            break
-          case 'mg':
-            kgWeight = weight.value / 1000000
-            break
-          default:
-            kgWeight = weight.value
-        }
-      }
-      const cmDimensions = {}
-      if (dimensions) {
-        for (const side in dimensions) {
-          const dimension = dimensions[side]
-          if (dimension && dimension.value) {
-            switch (dimension.unit) {
-              case 'm':
-                cmDimensions[side] = dimension.value * 100
+  appSdk.getAuth(storeId)
+    .then(auth => {
+      if (items) {
+        data.produto = []
+        items.forEach(item => {
+          getEcomProduct(appSdk, storeId, auth, item.product_id)
+          .then(product => {
+            const { name, quantity, dimensions, weight } = product
+          // parse cart items to kangu schema
+          let kgWeight = 0
+          if (weight && weight.value) {
+            switch (weight.unit) {
+              case 'g':
+                kgWeight = weight.value / 1000
                 break
-              case 'mm':
-                cmDimensions[side] = dimension.value / 10
+              case 'mg':
+                kgWeight = weight.value / 1000000
                 break
               default:
-                cmDimensions[side] = dimension.value
+                kgWeight = weight.value
             }
           }
-        }
+          const cmDimensions = {}
+          if (dimensions) {
+            for (const side in dimensions) {
+              const dimension = dimensions[side]
+              if (dimension && dimension.value) {
+                switch (dimension.unit) {
+                  case 'm':
+                    cmDimensions[side] = dimension.value * 100
+                    break
+                  case 'mm':
+                    cmDimensions[side] = dimension.value / 10
+                    break
+                  default:
+                    cmDimensions[side] = dimension.value
+                }
+              }
+            }
+          }
+          data.produto.push({
+            peso: kgWeight,
+            altura: cmDimensions.height || 0,
+            largura: cmDimensions.width || 0,
+            comprimento: cmDimensions.length || 0,
+            valor: ecomUtils.price(item),
+            quantidade: quantity,
+            produto: name
+          })
+          })
+          .catch(err => {
+            console.error(err)
+          })
+        })
       }
-      data.produto.push({
-        peso: kgWeight,
-        altura: cmDimensions.height || 0,
-        largura: cmDimensions.width || 0,
-        comprimento: cmDimensions.length || 0,
-        valor: ecomUtils.price(item),
-        quantidade: quantity,
-        produto: name
-      })
-      })
-      .catch(err => {
-        console.error(err)
-      })
+    return data
     })
-  }
+  
   // config source
   data.origem = 'E-Com Plus'
   // config order info
