@@ -32,6 +32,7 @@ module.exports = (order, token, storeId, appData, appSdk, auth) => {
       return data
     })
     .catch(err => {
+      console.log('deu erro')
       console.error(err)
     })     
   }
@@ -48,9 +49,10 @@ module.exports = (order, token, storeId, appData, appSdk, auth) => {
   // start parsing order body
   if (items) {
     data.produto = []
-    items.forEach(async item => {
-      const product = await getEcomProduct(appSdk, storeId, auth, item.product_id)
-      const { name, quantity, dimensions, weight } = product
+    items.forEach(item => {
+      getEcomProduct(appSdk, storeId, auth, item.product_id)
+      .then(product => {
+        const { name, quantity, dimensions, weight } = product
       // parse cart items to kangu schema
       let kgWeight = 0
       if (weight && weight.value) {
@@ -91,6 +93,10 @@ module.exports = (order, token, storeId, appData, appSdk, auth) => {
         valor: ecomUtils.price(item),
         quantidade: quantity,
         produto: name
+      })
+      })
+      .catch(err => {
+        console.error(err)
       })
     })
   }
