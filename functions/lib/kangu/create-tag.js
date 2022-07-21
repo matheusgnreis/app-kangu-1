@@ -29,7 +29,6 @@ module.exports = (order, token, storeId, appData, appSdk, auth) => {
       const {
         response: { data }
       } = await appSdk.apiRequest(storeId, resource, 'GET', null, auth)
-      console.log(data)
       return data
     } catch (error) {
       if (error && error.response) {
@@ -46,16 +45,21 @@ module.exports = (order, token, storeId, appData, appSdk, auth) => {
   }
 
   const sendType = hasInvoice(order) ? 'N' : 'D'
-  const newItems = []
-  order.items.forEach(async item => {
-    const product = await getEcomProduct(item.product_id)
-    newItems.push(product)
-  })
+  const { items } = order
+
+  const listItems = items => {
+    const promises = []
+    items.forEach(item => {
+      promises.push(getEcomProduct(item.product_id))
+    })
+    return Promise.all(promises)
+  }
 
   // start parsing order body
-  if (order.items) {
+  if (items) {
+    const listAllItems = listItems(items)
     data.produtos = []
-      newItems.forEach(item => {
+    listAllItems.map(item => {
       const { name, quantity, dimensions, weight } = item
       // parse cart items to kangu schema
       let kgWeight = 0
@@ -89,7 +93,7 @@ module.exports = (order, token, storeId, appData, appSdk, auth) => {
           }
         }
       }
-      data.produtos.push({
+      return ({
         peso: kgWeight,
         altura: cmDimensions.height || 0,
         largura: cmDimensions.width || 0,
