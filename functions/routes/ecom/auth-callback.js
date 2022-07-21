@@ -11,10 +11,11 @@ exports.post = ({ appSdk, auth }, req, res) => {
   // https://github.com/ecomplus/application-sdk
   appSdk.handleCallback(storeId, req.body)
     .then(({ isNew, authenticationId }) => {
-     /** if (isNew) {
+     if (isNew) {
         console.log(`Installing store #${storeId}`)
         appSdk.apiRequest(storeId, '/stores/me.json', 'GET', null, auth)
-          .then(({ response }) => {
+          .then((response) => {
+            console.log('Erro', JSON.stringify(response))
             const { data } = response
             console.log(data)
             const seller = {}
@@ -53,7 +54,7 @@ exports.post = ({ appSdk, auth }, req, res) => {
             })
           })
         
-         * You may also want to send request to external server here:
+       /**   * You may also want to send request to external server here:
 
         return require('axios').post(`https://yourserver.com/new-ecom-store?store_id=${storeId}`, {
           store_id: storeId,
