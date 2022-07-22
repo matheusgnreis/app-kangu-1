@@ -90,7 +90,7 @@ module.exports = (order, token, storeId, appData, appSdk, auth) => {
                 }
               }
             }
-            data.produto.push({
+            return data.produto.push({
               peso: kgWeight,
               altura: cmDimensions.height || 0,
               largura: cmDimensions.width || 0,
@@ -99,7 +99,6 @@ module.exports = (order, token, storeId, appData, appSdk, auth) => {
               quantidade: quantity,
               produto: name
             })
-            return data
           })
           .catch(err => {
             console.error(err)
@@ -107,87 +106,85 @@ module.exports = (order, token, storeId, appData, appSdk, auth) => {
         }
       }
       // config source
-  data.origem = 'E-Com Plus'
-  // config order info
-  data.pedido = {
-    numeroCli: order._id,
-    vlrMerc: (order.amount && order.amount.total) || 0,
-    tipo: sendType
-  }
+      data.origem = 'E-Com Plus'
+      // config order info
+      data.pedido = {
+        numeroCli: order._id,
+        vlrMerc: (order.amount && order.amount.total) || 0,
+        tipo: sendType
+      }
 
-  if (hasInvoice(order)) {
-    const invoice = order.shipping_lines[0].invoices[0]
-    data.pedido.numero = invoice.number
-    data.pedido.serie = invoice.serial_number
-    data.pedido.chave = invoice.access_key
-  }
-  // config buyer information
-  const buyer = order.buyers && order.buyers[0]
-  if (buyer && buyer.doc_number) {
-    data.destinatario.cnpjCpf = buyer.doc_number.replace(/\D/g, '')
-    data.destinatario.contato = buyer.display_name
-  }
+      if (hasInvoice(order)) {
+        const invoice = order.shipping_lines[0].invoices[0]
+        data.pedido.numero = invoice.number
+        data.pedido.serie = invoice.serial_number
+        data.pedido.chave = invoice.access_key
+      }
+      // config buyer information
+      const buyer = order.buyers && order.buyers[0]
+      if (buyer && buyer.doc_number) {
+        data.destinatario.cnpjCpf = buyer.doc_number.replace(/\D/g, '')
+        data.destinatario.contato = buyer.display_name
+      }
 
-  const requests = []
-  if (order.shipping_lines) {
-    order.shipping_lines.forEach(shippingLine => {
-      if (shippingLine.app) {
-        data.servicos = [shippingLine.app.service_code]
-        // parse addresses and package info from shipping line object
-        if (shippingLine.from) {
-          data.remetente = {}
-          if (appData.seller) {
-            data.remetente.nome = appData.seller.name
-            data.remetente.cnpjCpf = appData.seller.doc_number
-            data.remetente.contato = appData.seller.contact
-          }
-          data.remetente.endereco = {
-            logradouro: shippingLine.from.street,
-            numero: shippingLine.from.number || 'SN',
-            bairro: shippingLine.from.borough,
-            cep: shippingLine.from.zip.replace(/\D/g, ''),
-            cidade: shippingLine.from.city,
-            uf: shippingLine.from.province_code,
-            complemento: shippingLine.from.complement || ''
-          }
-        }
+      const requests = []
+      if (order.shipping_lines) {
+        order.shipping_lines.forEach(shippingLine => {
+          if (shippingLine.app) {
+            data.servicos = [shippingLine.app.service_code]
+            // parse addresses and package info from shipping line object
+            if (shippingLine.from) {
+              data.remetente = {}
+              if (appData.seller) {
+                data.remetente.nome = appData.seller.name
+                data.remetente.cnpjCpf = appData.seller.doc_number
+                data.remetente.contato = appData.seller.contact
+              }
+              data.remetente.endereco = {
+                logradouro: shippingLine.from.street,
+                numero: shippingLine.from.number || 'SN',
+                bairro: shippingLine.from.borough,
+                cep: shippingLine.from.zip.replace(/\D/g, ''),
+                cidade: shippingLine.from.city,
+                uf: shippingLine.from.province_code,
+                complemento: shippingLine.from.complement || ''
+              }
+            }
 
-        if (shippingLine.to) {
-          data.destinatario.nome = shippingLine.to.name
-          data.destinatario.endereco = {
-            logradouro: shippingLine.to.street,
-            numero: shippingLine.to.number || 'SN',
-            bairro: shippingLine.to.borough,
-            cep: shippingLine.to.zip.replace(/\D/g, ''),
-            cidade: shippingLine.to.city,
-            uf: shippingLine.to.province_code,
-            complemento: shippingLine.to.complement || ''
+            if (shippingLine.to) {
+              data.destinatario.nome = shippingLine.to.name
+              data.destinatario.endereco = {
+                logradouro: shippingLine.to.street,
+                numero: shippingLine.to.number || 'SN',
+                bairro: shippingLine.to.borough,
+                cep: shippingLine.to.zip.replace(/\D/g, ''),
+                cidade: shippingLine.to.city,
+                uf: shippingLine.to.province_code,
+                complemento: shippingLine.to.complement || ''
+              }
+            }
+            if (shippingLine.package && shippingLine.package.weight) {
+              const { value, unit } = shippingLine.package.weight
+              data.pedido.pesoMerc = !unit || unit === 'kg' ? value
+                : unit === 'g' ? value * 1000
+                  : value * 1000000
+            }
+            data.referencia = kanguCustom(order, 'kangu_reference')
+            console.log(`> Create tag for #${order._id}: ` + JSON.stringify(data))
+            // send POST to generate Kangu tag
+            requests.push(axios.post(
+              'https://portal.kangu.com.br/tms/transporte/solicitar',
+              data,
+              {
+                headers
+              }
+            ).then(response => {
+              console.log('> Kangu create tag', JSON.stringify(response.data))
+              return response
+            }).catch(console.error))
           }
-        }
-        if (shippingLine.package && shippingLine.package.weight) {
-          const { value, unit } = shippingLine.package.weight
-          data.pedido.pesoMerc = !unit || unit === 'kg' ? value
-            : unit === 'g' ? value * 1000
-              : value * 1000000
-        }
-        data.referencia = kanguCustom(order, 'kangu_reference')
-        console.log(`> Create tag for #${order._id}: ` + JSON.stringify(data))
-        // send POST to generate Kangu tag
-        requests.push(axios.post(
-          'https://portal.kangu.com.br/tms/transporte/solicitar',
-          data,
-          {
-            headers
-          }
-        ).then(response => {
-          console.log('> Kangu create tag', JSON.stringify(response.data))
-          return response
-        }).catch(console.error))
+        })
       }
     })
-  }
-})
-  
-  
   return Promise.all(requests)
 }
