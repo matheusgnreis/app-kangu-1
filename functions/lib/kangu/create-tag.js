@@ -130,7 +130,7 @@ module.exports = (order, token, storeId, appData, appSdk) => {
 
       const requests = []
       if (order.shipping_lines) {
-        order.shipping_lines.forEach(shippingLine => {
+        order.shipping_lines.forEach(async shippingLine => {
           if (shippingLine.app) {
             data.servicos = [shippingLine.app.service_code]
             // parse addresses and package info from shipping line object
