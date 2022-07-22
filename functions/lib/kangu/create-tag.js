@@ -32,6 +32,7 @@ module.exports = (order, token, storeId, appData, appSdk) => {
         })
         .catch((err) => {
           console.log(err.message)
+          console.log('erro na request api')
           reject(err)
         })
     })     
@@ -47,9 +48,9 @@ module.exports = (order, token, storeId, appData, appSdk) => {
   const { items } = order
 
   // start parsing order body
-  data.produto = []
   appSdk.getAuth(storeId)
     .then(async auth => {
+      data.produto = []
       if (items) {
         for (let i = 0; i < items.length; i++) {
           await getEcomProduct(appSdk, storeId, auth, items[i].product_id)
@@ -90,7 +91,7 @@ module.exports = (order, token, storeId, appData, appSdk) => {
                 }
               }
             }
-            return data.produto.push({
+            data.produto.push({
               peso: kgWeight,
               altura: cmDimensions.height || 0,
               largura: cmDimensions.width || 0,
@@ -102,7 +103,7 @@ module.exports = (order, token, storeId, appData, appSdk) => {
           })
           .catch(err => {
             console.log(err.message)
-            console.error(JSON.parse(err))
+            console.error('deu erro ao buscar produto')
           })
         }
       }
@@ -130,7 +131,7 @@ module.exports = (order, token, storeId, appData, appSdk) => {
 
       const requests = []
       if (order.shipping_lines) {
-        order.shipping_lines.forEach(async shippingLine => {
+        order.shipping_lines.forEach(shippingLine => {
           if (shippingLine.app) {
             data.servicos = [shippingLine.app.service_code]
             // parse addresses and package info from shipping line object
@@ -173,7 +174,7 @@ module.exports = (order, token, storeId, appData, appSdk) => {
             data.referencia = kanguCustom(order, 'kangu_reference')
             console.log(`> Create tag for #${order._id}: ` + JSON.stringify(data))
             // send POST to generate Kangu tag
-            await axios.post(
+            requests.push(axios.post(
               'https://portal.kangu.com.br/tms/transporte/solicitar',
               data,
               {
@@ -182,9 +183,10 @@ module.exports = (order, token, storeId, appData, appSdk) => {
             ).then(response => {
               console.log('> Kangu create tag', JSON.stringify(response.data))
               return response
-            }).catch(JSON.parse(error))
+            }).catch(console.log('deu erro ao gerar etiqueta')))
           }
         })
       }
     })
+  return Promise.all(requests)
 }
