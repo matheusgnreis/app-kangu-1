@@ -31,6 +31,7 @@ module.exports = (order, token, storeId, appData, appSdk, auth) => {
           resolve({ response })
         })
         .catch((err) => {
+          console.log(err.message)
           reject(err)
         })
     })     
@@ -174,7 +175,8 @@ module.exports = (order, token, storeId, appData, appSdk, auth) => {
         data.referencia = kanguCustom(order, 'kangu_reference')
         console.log(`> Create tag for #${order._id}: ` + JSON.stringify(data))
         // send POST to generate Kangu tag
-        requests.push(axios.post(
+        return data
+        /* requests.push(axios.post(
           'https://portal.kangu.com.br/tms/transporte/solicitar',
           data,
           {
@@ -183,7 +185,7 @@ module.exports = (order, token, storeId, appData, appSdk, auth) => {
         ).then(response => {
           console.log('> Kangu create tag', JSON.stringify(response.data))
           return response
-        }).catch(console.error))
+        }).catch(console.error)) */
       }
     })
   }
