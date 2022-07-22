@@ -51,8 +51,8 @@ module.exports = (order, token, storeId, appData, appSdk, auth) => {
   appSdk.getAuth(storeId)
     .then(auth => {
       if (items) {
-        items.forEach(item => {
-          getEcomProduct(appSdk, storeId, auth, item.product_id)
+        items.forEach(async item => {
+          await getEcomProduct(appSdk, storeId, auth, item.product_id)
           .then(({ response }) => {
             const product = response.data
               console.log('Busca produto')
