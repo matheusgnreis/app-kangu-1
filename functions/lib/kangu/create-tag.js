@@ -25,7 +25,6 @@ module.exports = async (order, token, storeId, appData, appSdk, auth) => {
 
   const getEcomProduct = (appSdk, storeId, auth, productId) => {
     const resource = `/products/${productId}.json`
-    appSdk.apiRequest(storeId, resource, 'GET', null, auth)
     return new Promise((resolve, reject) => {
       appSdk.apiRequest(storeId, resource, 'GET', null, auth)
         .then(({ response }) => {
@@ -52,8 +51,6 @@ module.exports = async (order, token, storeId, appData, appSdk, auth) => {
     .then(auth => {
       if (items) {
         items.forEach(item => {
-          console.log('Olha o item ai')
-          console.log(item)
           getEcomProduct(appSdk, storeId, auth, item.product_id)
           .then(result => {
             const product = result.data
