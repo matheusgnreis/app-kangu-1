@@ -26,14 +26,14 @@ module.exports = (order, token, storeId, appData, appSdk, auth) => {
   const getEcomProduct = (appSdk, storeId, auth, productId) => {
     const resource = `/products/${productId}.json`
     appSdk.apiRequest(storeId, resource, 'GET', null, auth)
-    .then(response => {
-      console.log('Olá busquei o produto: ', JSON.stringify(response.data))
-      const { data } = response
-      return data
-    })
-    .catch(err => {
-      console.log('deu erro')
-      console.error(err)
+    return new Promise((resolve, reject) => {
+      appSdk.apiRequest(storeId, resource, 'GET', null, auth)
+        .then(({ response }) => {
+          resolve({ response })
+        })
+        .catch((err) => {
+          reject(err)
+        })
     })     
   }
 
@@ -53,7 +53,8 @@ module.exports = (order, token, storeId, appData, appSdk, auth) => {
       if (items) {
         items.forEach(item => {
           return getEcomProduct(appSdk, storeId, auth, item.product_id)
-          .then(product => {
+          .then(result => {
+            const product = result.data
               console.log('Busca produto')
               console.log(product)
               const { name, quantity, dimensions, weight } = product
