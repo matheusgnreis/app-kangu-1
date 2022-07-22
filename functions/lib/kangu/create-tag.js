@@ -49,10 +49,10 @@ module.exports = (order, token, storeId, appData, appSdk, auth) => {
   // start parsing order body
   data.produto = []
   appSdk.getAuth(storeId)
-    .then(auth => {
+    .then(async auth => {
       if (items) {
-        items.forEach(async item => {
-          await getEcomProduct(appSdk, storeId, auth, item.product_id)
+        for (let i = 0; i < items.length; i++) {
+          await getEcomProduct(appSdk, storeId, auth, items[i].product_id)
           .then(({ response }) => {
             const product = response.data
               console.log('Busca produto')
@@ -104,11 +104,9 @@ module.exports = (order, token, storeId, appData, appSdk, auth) => {
           .catch(err => {
             console.error(err)
           })
-        })
+        }
       }
-    })
-  
-  // config source
+      // config source
   data.origem = 'E-Com Plus'
   // config order info
   data.pedido = {
@@ -175,8 +173,7 @@ module.exports = (order, token, storeId, appData, appSdk, auth) => {
         data.referencia = kanguCustom(order, 'kangu_reference')
         console.log(`> Create tag for #${order._id}: ` + JSON.stringify(data))
         // send POST to generate Kangu tag
-        return data
-        /* requests.push(axios.post(
+        requests.push(axios.post(
           'https://portal.kangu.com.br/tms/transporte/solicitar',
           data,
           {
@@ -185,9 +182,12 @@ module.exports = (order, token, storeId, appData, appSdk, auth) => {
         ).then(response => {
           console.log('> Kangu create tag', JSON.stringify(response.data))
           return response
-        }).catch(console.error)) */
+        }).catch(console.error))
       }
     })
   }
+})
+  
+  
   return Promise.all(requests)
 }
