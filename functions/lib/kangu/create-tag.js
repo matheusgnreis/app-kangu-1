@@ -181,7 +181,10 @@ module.exports = async (order, token, storeId, appData, appSdk) => {
         ).then(response => {
           console.log('> Kangu create tag', JSON.stringify(response.data))
           return response
-        }).catch(console.log('deu erro ao gerar etiqueta')))
+        }).catch(err => {
+          console.log(err.message)
+          console.error('deu erro ao gerar etiqueta')
+        })
       }
     })
   }
