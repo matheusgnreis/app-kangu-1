@@ -55,7 +55,7 @@ module.exports = async (order, token, storeId, appData, appSdk) => {
       .then(({ response }) => {
         const product = response.data
           console.log('Busca produto')
-          console.log(product)
+          console.log(JSON.stringify(product))
           const { name, quantity, dimensions, weight } = product
         // parse cart items to kangu schema
         let kgWeight = 0
@@ -94,7 +94,7 @@ module.exports = async (order, token, storeId, appData, appSdk) => {
           altura: cmDimensions.height || 0,
           largura: cmDimensions.width || 0,
           comprimento: cmDimensions.length || 0,
-          valor: ecomUtils.price(item),
+          valor: ecomUtils.price(items[i]),
           quantidade: quantity,
           produto: name
         })
