@@ -1,7 +1,7 @@
 const axios = require('axios')
 const ecomUtils = require('@ecomplus/utils')
 
-module.exports = (order, token, storeId, appData, appSdk) => {
+module.exports = async (order, token, storeId, appData, appSdk) => {
 // create new shipping tag with Kangu
 // https://portal.kangu.com.br/docs/api/transporte/#/
   const headers = {
@@ -23,10 +23,10 @@ module.exports = (order, token, storeId, appData, appSdk) => {
     }
   }
 
-  const getEcomProduct = (appSdk, storeId, auth, productId) => {
+  const getEcomProduct = (appSdk, storeId, productId) => {
     const resource = `/products/${productId}.json`
     return new Promise((resolve, reject) => {
-      appSdk.apiRequest(storeId, resource, 'GET', null, auth, noAuth)
+      appSdk.apiRequest(storeId, resource, 'GET', null, null, noAuth)
         .then(({ response }) => {
           resolve({ response })
         })
@@ -51,7 +51,7 @@ module.exports = (order, token, storeId, appData, appSdk) => {
   data.produto = []
   if (items) {
     for (let i = 0; i < items.length; i++) {
-      await getEcomProduct(appSdk, storeId, null, items[i].product_id)
+      await getEcomProduct(appSdk, storeId, items[i].product_id)
       .then(({ response }) => {
         const product = response.data
           console.log('Busca produto')
