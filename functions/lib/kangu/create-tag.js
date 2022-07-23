@@ -26,7 +26,7 @@ module.exports = async (order, token, storeId, appData, appSdk) => {
   const getEcomProduct = (appSdk, storeId, productId) => {
     const resource = `/products/${productId}.json`
     return new Promise((resolve, reject) => {
-      appSdk.apiRequest(storeId, resource, 'GET', null, null, noAuth)
+      appSdk.apiRequest(storeId, resource, 'GET', null, null, noAuth = true)
         .then(({ response }) => {
           resolve({ response })
         })
