@@ -48,7 +48,7 @@ module.exports = async (order, token, storeId, appData, appSdk) => {
   const { items } = order
 
   // start parsing order body
-  data.produto = []
+  data.produtos = []
   if (items) {
     for (let i = 0; i < items.length; i++) {
       await getEcomProduct(appSdk, storeId, items[i].product_id)
@@ -89,7 +89,7 @@ module.exports = async (order, token, storeId, appData, appSdk) => {
             }
           }
         }
-        data.produto.push({
+        data.produtos.push({
           peso: kgWeight,
           altura: cmDimensions.height || 0,
           largura: cmDimensions.width || 0,
