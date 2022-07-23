@@ -59,6 +59,7 @@ exports.post = ({ appSdk }, req, res) => {
               return createTag(order, kangu_token, storeId, appData, appSdk)
                 .then(data => {
                   console.log(`>> Etiqueta Criada Com Sucesso #${storeId} ${resourceId}`)
+                  console.log(data)
                   // updates hidden_metafields with the generated tag id
                   return appSdk.apiRequest(
                     storeId,
@@ -69,7 +70,11 @@ exports.post = ({ appSdk }, req, res) => {
                       field: 'rastreio',
                       value: data.codigo
                     }
-                  ).then(() => data)
+                  )
+                  .then(() => data)
+                  .catch(err => {
+                    console.error(err.message)
+                  })
                 })
 
                 .then(data => {

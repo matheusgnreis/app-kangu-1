@@ -14,46 +14,48 @@ exports.post = ({ appSdk, auth }, req, res) => {
      if (isNew) {
         console.log(authenticationId)
         console.log(`Installing store #${storeId}`)
-        appSdk.apiRequest(storeId, '/stores/me.json', 'GET')
-          .then((response) => {
-            console.log('Erro', response)
-            const { data } = response
-            console.log(data)
-            const seller = {}
-            const from = {}
-            if (data.doc_number) {
-              seller.doc_number = data.doc_number
-            }
-            seller.name = data.corporate_name || data.name || 'Nome da loja'
-            if (data.address) {
-              const address = data.address.split(',')
-                ['street', 'number', 'borough', 'city', 'province_code', 'complement'].forEach((field, i) => {
-                  from[field] = address[i] || undefined
-                  from[field] = from[field].trim()
-                })
-            }
-            updateAppData({ appSdk, storeId, auth }, {
-              seller,
-              from
+        appSdk.getAuth(storeId, authenticationId).then(auth => {
+          	return appSdk.apiRequest(storeId, '/stores/me.json', 'GET', null, auth)
+            .then((response) => {
+              console.log('Erro', response)
+              const { data } = response
+              console.log(data)
+              const seller = {}
+              const from = {}
+              if (data.doc_number) {
+                seller.doc_number = data.doc_number
+              }
+              seller.name = data.corporate_name || data.name || 'Nome da loja'
+              if (data.address) {
+                const address = data.address.split(',')
+                  ['street', 'number', 'borough', 'city', 'province_code', 'complement'].forEach((field, i) => {
+                    from[field] = address[i] || undefined
+                    from[field] = from[field].trim()
+                  })
+              }
+              updateAppData({ appSdk, storeId, auth }, {
+                seller,
+                from
+              })
             })
-          })
-          .catch(err => {
-            const { message, response } = err
-            console.log(message)
-            console.log('------')
-            console.log(response)
-            if (response) {
-              errorHandling(err)
-            } else {
-              // Firestore error ?
-              console.error(err)
-            }
-            res.status(500)
-            res.send({
-              error: 'not_req_me',
-              message
+            .catch(err => {
+              const { message, response } = err
+              console.log(message)
+              console.log('------')
+              console.log(response)
+              if (response) {
+                errorHandling(err)
+              } else {
+                // Firestore error ?
+                console.error(err)
+              }
+              res.status(500)
+              res.send({
+                error: 'not_req_me',
+                message
+              })
             })
-          })
+        })
         
        /**   * You may also want to send request to external server here:
 
