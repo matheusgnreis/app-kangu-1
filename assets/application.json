@@ -1,6 +1,6 @@
 {
   "app_id": 102707,
-  "title": "Kangu TESTE",
+  "title": "Kangu",
   "slug": "kangu",
   "type": "external",
   "state": "active",
@@ -8,7 +8,7 @@
   "modules": {
     "calculate_shipping": {
       "enabled": true,
-      "endpoint": "https://us-central1-ecom-kangu-1.cloudfunctions.net/app/ecom/modules/calculate-shipping"
+      "endpoint": "https://us-central1-ecom-kangu.cloudfunctions.net/app/ecom/modules/calculate-shipping"
     }
   },
   "auth_scope": {
@@ -361,6 +361,6 @@
       "hide": false
     }
   },
-  "auth_callback_uri": "https://us-central1-ecom-kangu-1.cloudfunctions.net/app/ecom/auth-callback",
+  "auth_callback_uri": "https://us-central1-ecom-kangu.cloudfunctions.net/app/ecom/auth-callback",
   "version": "1.0.2"
 }
