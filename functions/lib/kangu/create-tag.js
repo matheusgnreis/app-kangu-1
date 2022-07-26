@@ -170,6 +170,7 @@ module.exports = async (order, token, storeId, appData, appSdk) => {
               : value * 1000000
         }
         data.referencia = kanguCustom(order, 'kangu_reference')
+        console.log('Estou criando a tag')
         console.log(`> Create tag for #${order._id}: ` + JSON.stringify(data))
         // send POST to generate Kangu tag
         requests.push(axios.post(
@@ -179,7 +180,7 @@ module.exports = async (order, token, storeId, appData, appSdk) => {
             headers
           }
         ).then(response => {
-          console.log('> Kangu create tag', JSON.stringify(response.data))
+          console.log('> Kangu create tag', JSON.stringify(response))
           return response.data
         }).catch(
           console.log(err.message),

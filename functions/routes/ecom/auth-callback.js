@@ -18,7 +18,6 @@ exports.post = ({ appSdk, auth }, req, res) => {
           	return appSdk.apiRequest(storeId, '/stores/me.json', 'GET', null, auth)
             .then((response) => {
               const { data } = response
-              console.log(JSON.stringify(data))
               const seller = {}
               const from = {}
               if (data.doc_number) {

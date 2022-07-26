@@ -7,7 +7,7 @@ const ECHO_SUCCESS = 'SUCCESS'
 const ECHO_SKIP = 'SKIP'
 const ECHO_API_ERROR = 'STORE_API_ERR'
 
-exports.post = ({ appSdk }, req, res) => {
+exports.post = async ({ appSdk }, req, res) => {
   // receiving notification from Store API
   const { storeId } = req
 
@@ -19,13 +19,13 @@ exports.post = ({ appSdk }, req, res) => {
 
   // get app configured options
   let auth
-  appSdk.getAuth(storeId)
+  await appSdk.getAuth(storeId)
     .then(_auth => {
       auth = _auth
       return getAppData({ appSdk, storeId, auth })
     })
 
-    .then(appData => {
+    .then(async appData => {
       if (
         Array.isArray(appData.ignore_triggers) &&
         appData.ignore_triggers.indexOf(trigger.resource) > -1
@@ -49,19 +49,19 @@ exports.post = ({ appSdk }, req, res) => {
           // read full order body
           const resourceId = trigger.resource_id
           console.log('Trigger disparado para enviar tag com id:', resourceId)
-          return appSdk.apiRequest(storeId, `/orders/${resourceId}.json`, 'GET', null, auth)
-            .then(({ response }) => {
+          return await appSdk.apiRequest(storeId, `/orders/${resourceId}.json`, 'GET', null, auth)
+            .then(async ({ response }) => {
               const order = response.data
               if (order && order.shipping_lines[0] && order.shipping_lines[0].app && order.shipping_lines[0].app.service_name.toLowerCase().indexOf('kangu') === -1) {
                 return res.send(ECHO_SKIP)
               }
               console.log(`Shipping tag for #${storeId} ${order._id}`)
-              return createTag(order, kangu_token, storeId, appData, appSdk)
-                .then(data => {
+              return await createTag(order, kangu_token, storeId, appData, appSdk)
+                .then(async data => {
                   console.log(`>> Etiqueta Criada Com Sucesso #${storeId} ${resourceId}`)
                   console.log(data)
                   // updates hidden_metafields with the generated tag id
-                  return appSdk.apiRequest(
+                  return await appSdk.apiRequest(
                     storeId,
                     `/orders/${resourceId}/hidden_metafields.json`,
                     'POST',
@@ -78,7 +78,7 @@ exports.post = ({ appSdk }, req, res) => {
                   })
                 })
 
-                .then(data => {
+                .then(async data => {
                   if (data.etiquetas.length) {
                     const shippingLine = order.shipping_lines[0]
                     if (shippingLine) {
@@ -87,7 +87,7 @@ exports.post = ({ appSdk }, req, res) => {
                         code: data.etiquetas[0].numeroTransp,
                         link: `https://www.melhorrastreio.com.br/rastreio/${data.etiquetas[0].numeroTransp}`
                       })
-                      return appSdk.apiRequest(
+                      return await appSdk.apiRequest(
                         storeId,
                         `/orders/${resourceId}/shipping_lines/${shippingLine._id}.json`,
                         'PATCH',
