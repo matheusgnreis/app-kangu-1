@@ -69,7 +69,8 @@ exports.post = ({ appSdk }, req, res) => {
                       namespace: 'app-kangu',
                       field: 'rastreio',
                       value: data.codigo
-                    }
+                    },
+                    auth
                   )
                   .then(() => data)
                   .catch(err => {
@@ -90,7 +91,8 @@ exports.post = ({ appSdk }, req, res) => {
                         storeId,
                         `/orders/${resourceId}/shipping_lines/${shippingLine._id}.json`,
                         'PATCH',
-                        { tracking_codes: trackingCodes }
+                        { tracking_codes: trackingCodes },
+                        auth
                       )
                     }
                   }
