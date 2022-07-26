@@ -56,7 +56,7 @@ exports.post = ({ appSdk }, req, res) => {
                 return res.send(ECHO_SKIP)
               }
               console.log(`Shipping tag for #${storeId} ${order._id}`)
-              return await createTag(order, kangu_token, storeId, appData, appSdk)
+              return createTag(order, kangu_token, storeId, appData, appSdk)
                 .then(data => {
                   console.log(`>> Etiqueta Criada Com Sucesso #${storeId} ${resourceId}`)
                   console.log(data)
