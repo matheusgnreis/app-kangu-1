@@ -59,7 +59,7 @@ module.exports = async (order, token, storeId, appData, appSdk) => {
   if (items) {
     for (let i = 0; i < items.length; i++) {
       await getEcomProduct(appSdk, storeId, items[i].product_id)
-      .then(({ response }) => {
+      .then(async ({ response }) => {
         const product = response.data
           console.log('Busca produto')
           console.log(JSON.stringify(product))
@@ -96,8 +96,8 @@ module.exports = async (order, token, storeId, appData, appSdk) => {
             }
           }
         }
-        const quantity = getPropertie(items, item[i], 'quantity')
-        const price = getPropertie(items, item[i], 'price')
+        const quantity = await getPropertie(items, product, 'quantity')
+        const price = await getPropertie(items, product, 'price')
         data.produtos.push({
           peso: kgWeight,
           altura: cmDimensions.height || 0,
