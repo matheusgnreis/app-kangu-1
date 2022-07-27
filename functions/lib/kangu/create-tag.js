@@ -59,11 +59,13 @@ module.exports = async (order, token, storeId, appData, appSdk) => {
   if (items) {
     for (let i = 0; i < items.length; i++) {
       await getEcomProduct(appSdk, storeId, items[i].product_id)
-      .then(async ({ response }) => {
+      .then(({ response }) => {
         const product = response.data
           console.log('Busca produto')
           console.log(JSON.stringify(product))
           const { name, dimensions, weight } = product
+          const quantity = getPropertie(items, product, 'quantity')
+          const price = getPropertie(items, product, 'price')
         // parse cart items to kangu schema
         let kgWeight = 0
         if (weight && weight.value) {
@@ -96,8 +98,6 @@ module.exports = async (order, token, storeId, appData, appSdk) => {
             }
           }
         }
-        const quantity = await getPropertie(items, product, 'quantity')
-        const price = await getPropertie(items, product, 'price')
         data.produtos.push({
           peso: kgWeight,
           altura: cmDimensions.height || 0,
