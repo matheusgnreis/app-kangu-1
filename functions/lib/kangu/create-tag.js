@@ -103,7 +103,7 @@ module.exports = async (order, token, storeId, appData, appSdk) => {
           altura: cmDimensions.height || 0,
           largura: cmDimensions.width || 0,
           comprimento: cmDimensions.length || 0,
-          valor: ecomUtils.price(price),
+          valor: price,
           quantidade: quantity,
           produto: name
         })
