@@ -69,8 +69,7 @@ exports.post = ({ appSdk }, req, res) => {
                       namespace: 'app-kangu',
                       field: 'rastreio',
                       value: data.codigo
-                    },
-                    auth
+                    }
                   )
                   .then(() => data)
                   .catch(err => {
@@ -79,6 +78,7 @@ exports.post = ({ appSdk }, req, res) => {
                 })
 
                 .then(data => {
+                  console.log(data)
                   if (data.etiquetas.length) {
                     const shippingLine = order.shipping_lines[0]
                     if (shippingLine) {
@@ -91,8 +91,7 @@ exports.post = ({ appSdk }, req, res) => {
                         storeId,
                         `/orders/${resourceId}/shipping_lines/${shippingLine._id}.json`,
                         'PATCH',
-                        { tracking_codes: trackingCodes },
-                        auth
+                        { tracking_codes: trackingCodes }
                       )
                     }
                   }
