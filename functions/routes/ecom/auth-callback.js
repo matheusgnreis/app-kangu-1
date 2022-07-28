@@ -12,7 +12,6 @@ exports.post = ({ appSdk, auth }, req, res) => {
   appSdk.handleCallback(storeId, req.body)
     .then(({ isNew, authenticationId }) => {
      if (isNew) {
-        console.log(authenticationId)
         console.log(`Installing store #${storeId}`)
         appSdk.getAuth(storeId, authenticationId).then(auth => {
           	return appSdk.apiRequest(storeId, '/stores/me.json', 'GET', null, auth)

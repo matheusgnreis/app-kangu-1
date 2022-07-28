@@ -18,12 +18,8 @@ exports.post = ({ appSdk }, req, res) => {
   const trigger = req.body
 
   // get app configured options
-  let auth
-  appSdk.getAuth(storeId)
-    .then(_auth => {
-      auth = _auth
-      return getAppData({ appSdk, storeId, auth })
-    })
+  appSdk.getAuth(storeId).then(auth => {
+    return getAppData({ appSdk, storeId, auth })
 
     .then(appData => {
       if (
@@ -59,7 +55,7 @@ exports.post = ({ appSdk }, req, res) => {
               return createTag(order, kangu_token, storeId, appData, appSdk)
                 .then(data => {
                   console.log(`>> Etiqueta Criada Com Sucesso #${storeId} ${resourceId}`)
-                  console.log(data)
+                  console.log(JSON.stringify(data))
                   // updates hidden_metafields with the generated tag id
                   return appSdk.apiRequest(
                     storeId,
@@ -68,20 +64,21 @@ exports.post = ({ appSdk }, req, res) => {
                     {
                       namespace: 'app-kangu',
                       field: 'rastreio',
-                      value: data[0].codigo
+                      value: data.codigo
                     },
                     null,
                     auth
                   )
                   .then(() => data)
                   .catch(err => {
+                    console.log(err.statusCode)
                     console.error(err.message)
                   })
                 })
 
                 .then(data => {
                   console.log(data)
-                  const tag = data[0]
+                  const tag = data
                   if (tag.etiquetas.length) {
                     const shippingLine = order.shipping_lines[0]
                     if (shippingLine) {
@@ -115,12 +112,12 @@ exports.post = ({ appSdk }, req, res) => {
         }
       }
     })
-
-
     .then(() => {
       // all done
       res.send(ECHO_SUCCESS)
     })
+  })
+
 
     .catch(err => {
       if (err.name === SKIP_TRIGGER_NAME) {

@@ -189,7 +189,7 @@ module.exports = async (order, token, storeId, appData, appSdk) => {
             headers
           }
         ).then(response => {
-          console.log('> Kangu create tag', console.log(response))
+          console.log('> Kangu create tag')
           return response.data
         }).catch(err => {
           console.log('deu erro na etiqueta', err.message)
