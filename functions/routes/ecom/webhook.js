@@ -68,8 +68,10 @@ exports.post = ({ appSdk }, req, res) => {
                     {
                       namespace: 'app-kangu',
                       field: 'rastreio',
-                      value: data.codigo
-                    }
+                      value: data[0].codigo
+                    },
+                    null,
+                    auth
                   )
                   .then(() => data)
                   .catch(err => {
@@ -79,19 +81,22 @@ exports.post = ({ appSdk }, req, res) => {
 
                 .then(data => {
                   console.log(data)
-                  if (data.etiquetas.length) {
+                  const tag = data[0]
+                  if (tag.etiquetas.length) {
                     const shippingLine = order.shipping_lines[0]
                     if (shippingLine) {
                       const trackingCodes = shippingLine.tracking_codes || []
                       trackingCodes.push({
-                        code: data.etiquetas[0].numeroTransp,
-                        link: `https://www.melhorrastreio.com.br/rastreio/${data.etiquetas[0].numeroTransp}`
+                        code: tag.etiquetas[0].numeroTransp,
+                        link: `https://www.melhorrastreio.com.br/rastreio/${tag.etiquetas[0].numeroTransp}`
                       })
                       return appSdk.apiRequest(
                         storeId,
                         `/orders/${resourceId}/shipping_lines/${shippingLine._id}.json`,
                         'PATCH',
-                        { tracking_codes: trackingCodes }
+                        { tracking_codes: trackingCodes },
+                        null,
+                        auth 
                       )
                     }
                   }
